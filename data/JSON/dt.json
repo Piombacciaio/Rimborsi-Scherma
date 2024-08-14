@@ -1,0 +1,14 @@
+[
+  {
+        "Cognome": "DOE",
+        "DataNascita": "1989-05-23T00:00:00+01:00",
+        "DataRinnovo": "2023-09-11T00:00:00+01:00",
+        "Domicilio": "MILANO, Piazza del Duomo 1",
+        "Località": "Milano",
+        "LuogoNascita": "MILANO",
+        "MaschioFemmina": "false",
+        "Nome": "JOHN",
+        "NumFIS": "000000",
+        "Qualifica": "COMPUTERISTA|ARBITRO ASP.|ARBITRO INT.|ARBITRO NAZ.|TECNICO ARMI|DIRETTORE TORNEO"
+  },
+]
