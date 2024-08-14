@@ -7,69 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-#DATA LOADING
-if __name__ == "__main__":
-  PSG.theme("DarkBlack")
-
-benzina = 1.95
-today = dt.date.today()
-current_year = today.year
-current_month = today.month
-current_day = today.day
-current_dir, _ = str(os.path.realpath(__file__)).replace("\\", "/").rsplit("/", 1)
-
-with open(f"{current_dir}/data/JSON/dt.json", "r", encoding="utf-8") as f:
-  dit = json.load(f)
-
-home_tab = [
-  [PSG.Text("Nome Gara", s=(10,1)), PSG.Input("Nome in locandina", key="-NOME-GARA-", s=(50,1))], 
-  [PSG.Text("Tipo Gara", s=(10,1)), PSG.Combo(["REG", "INTREG", "NAZ"], "Tipo", s=(8,1), key="-TIPO-GARA-", button_background_color="gray", button_arrow_color="white", enable_events=True)],
-  [PSG.Text("Città Gara", s=(10,1)), PSG.Input("Città", key="-LUOGO-GARA-", size=(50,1))], 
-  [PSG.Text("Indirizzo Gara", s=(10,1)), PSG.Input("Via", key="-INDIRIZZO-GARA-", size=(50,1))], 
-  [PSG.Text("Data Gara", s=(10,1)), 
-  PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="Giorno", key="-GIORNO-GARA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
-  PSG.Text("/"),
-  PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="Mese", key="-MESE-GARA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
-  PSG.Text("/"),
-  PSG.Combo([x for x in range(current_year - 1, current_year + 2)][::-1], default_value="Anno", key="-ANNO-GARA-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
-  [PSG.Text("Convocazione", s=(10,1)), 
-  PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="Giorno", key="-GIORNO-CONV-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
-  PSG.Text("/"),
-  PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="Mese", key="-MESE-CONV-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
-  PSG.Text("/"),
-  PSG.Combo([x for x in range(current_year - 1, current_year + 2)][::-1], default_value="Anno", key="-ANNO-CONV-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
-  [PSG.Text("Data firma", s=(10,1)), 
-  PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="%02d" % current_day, key="-GIORNO-FIRMA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
-  PSG.Text("/"),
-  PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % current_month, key="-MESE-FIRMA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
-  PSG.Text("/"),
-  PSG.Combo([x for x in range(current_year - 1, current_year + 2)][::-1], default_value=current_year, key="-ANNO-FIRMA-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
-  [PSG.Button("Export", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray")],
-  [PSG.Push()],
-  [PSG.Text("Output")],
-  [PSG.Multiline(disabled=True, no_scrollbar=True, autoscroll=True, expand_x=True, auto_refresh=True, size=(1, 5), key="-OUTPUT-TERMINAL-")],
-  [PSG.Button("Clear output", key="-CLR-OUT-", button_color="gray")]
-]
-dit_list = ([
-   PSG.Checkbox(text="", key=f"-CONVOCATO-{person["NumFIS"]}-", s=(1,1)), 
-   PSG.Text(f"{person["Cognome"]} {person["Nome"]}",s=(34,1)),
-   PSG.Input("", key= f"-GIORNI-{person["NumFIS"]}-", s=(5,1)),
-   PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(15,0))] for person in dit)
-peeps_tab = [
-  [PSG.Text("Conv."), PSG.Push(), PSG.Text("Arbitro"), PSG.Push(), PSG.Text("Giorni "), PSG.Text("Extra"), PSG.Text("   ")],
-  [PSG.Column(dit_list, s=(1,300), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")]
-]
-default_view = [
-  [PSG.TabGroup(
-      [
-        [PSG.Tab("Home", home_tab)],
-        [PSG.Tab("Arbitri", peeps_tab)]
-      ]
-    )
-  ]
-]
-
-def get_distance(start: list[str]|str, destination:str):
+def get_distance(start: list[str]|str, destination:str, layout):
   
   #URL Encode
   url_start:list[str] = []
@@ -106,31 +44,99 @@ def get_distance(start: list[str]|str, destination:str):
       place = urllib.parse.unquote_plus(place)
       distances[place.upper().replace("+", " ")] = float(distance.replace(",", "."))
     except Exception as e:
-      print(f"Exception encountered while fetching distance from {place}: {e}")
+      window["-OUTPUT-TERMINAL-"].update(f"Exception encountered while fetching distance from {place}: {e}\n", text_color_for_value="yellow", append=True)
       place = urllib.parse.unquote_plus(place)
       distances[place.upper()] = 0
+  window["-OUTPUT-TERMINAL-"].update(f"Loaded Routes\n", text_color_for_value="green", append=True)
   driver.quit()
   return distances
 
+def load_data():
+  #Caricamento dati su direttori, partenze, compensi e template del modulo
+  with open(f"{current_dir}/data/JSON/dt.json", "r", encoding="utf-8") as f:
+    dit = json.load(f)
+  with open(f"{current_dir}/data/JSON/Città.json", "r", encoding="utf-8") as f:
+    partenze = json.load(f)
+  with open(f"{current_dir}/data/JSON/gettoni.json", "r") as f:
+    rimborsi = json.load(f)
+  form_fields = list(fillpdfs.get_form_fields(f"{current_dir}/data/template.pdf").keys())
+  return dit, partenze, rimborsi, form_fields
+
+
+
+
+#DATA LOADING
 if __name__ == "__main__":
+  PSG.theme("DarkBlack")
+
+  today = dt.date.today()
+  current_year = today.year
+  current_month = today.month
+  current_day = today.day
+  current_dir, _ = str(os.path.realpath(__file__)).replace("\\", "/").rsplit("/", 1)
+  dit, partenze, rimborsi, form_fields = load_data()
+
+  home_tab = [
+    [PSG.Text("Nome Gara", s=(11,1)), PSG.Input("Nome in locandina", key="-NOME-GARA-", s=(50,1))], 
+    [PSG.Text("Tipo Gara", s=(11,1)), PSG.Combo(["REG", "INTREG", "NAZ"], "Tipo", s=(8,1), key="-TIPO-GARA-", button_background_color="gray", button_arrow_color="white", enable_events=True)],
+    [PSG.Text("Città Gara", s=(11,1)), PSG.Input("Città", key="-LUOGO-GARA-", s=(50,1))], 
+    [PSG.Text("Indirizzo Gara", s=(11,1)), PSG.Input("Via", key="-INDIRIZZO-GARA-", s=(37,1)), PSG.Button("Load routes", key="-LOAD-ROUTES-", button_color="gray", pad=(10,0))], 
+    [PSG.Text("Data Gara", s=(11,1)), 
+    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="Giorno", key="-GIORNO-GARA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Text("/"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="Mese", key="-MESE-GARA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Text("/"),
+    PSG.Combo([x for x in range(current_year - 1, current_year + 2)][::-1], default_value="Anno", key="-ANNO-GARA-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    [PSG.Text("Convocazione", s=(11,1)), 
+    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="Giorno", key="-GIORNO-CONV-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Text("/"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="Mese", key="-MESE-CONV-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Text("/"),
+    PSG.Combo([x for x in range(current_year - 1, current_year + 2)][::-1], default_value="Anno", key="-ANNO-CONV-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    [PSG.Text("Data firma", s=(11,1)), 
+    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="%02d" % current_day, key="-GIORNO-FIRMA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Text("/"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % current_month, key="-MESE-FIRMA-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Text("/"),
+    PSG.Combo([x for x in range(current_year - 1, current_year + 2)][::-1], default_value=current_year, key="-ANNO-FIRMA-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", key="-COSTO-BENZINA-", s=(5,1)), PSG.Text("€/L")],
+    [PSG.Button("Export", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Push(), PSG.Button("Reload Config", key="-RLD-CFG-", button_color="gray")],
+    [PSG.Push()],
+    [PSG.Text("Output")],
+    [PSG.Multiline(disabled=True, no_scrollbar=True, autoscroll=True, expand_x=True, auto_refresh=True, s=(1, 5), key="-OUTPUT-TERMINAL-")],
+    [PSG.Button("Clear output", key="-CLR-OUT-", button_color="gray")]
+  ]
+  dit_list = ([
+    PSG.Checkbox(text="", key=f"-CONVOCATO-{person["NumFIS"]}-", s=(1,1)), 
+    PSG.Text(f"{person["Cognome"]} {person["Nome"]}",s=(35,1)),
+    PSG.Input("", key= f"-GIORNI-{person["NumFIS"]}-", s=(5,1)),
+    PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(15,0))] for person in dit)
+  peeps_tab = [
+    [PSG.Text("Conv."), PSG.Push(), PSG.Text("Arbitro"), PSG.Push(), PSG.Text("Giorni "), PSG.Text("Extra"), PSG.Text("   ")],
+    [PSG.Column(dit_list, s=(1,350), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")]
+  ]
+  default_view = [
+    [PSG.TabGroup(
+        [
+          [PSG.Tab("Home", home_tab)],
+          [PSG.Tab("Arbitri", peeps_tab)]
+        ]
+      )
+    ]
+  ]
 
   window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", default_view, finalize=True)
-  
   while True:
 
     events, values = window.read()
     if events == PSG.WIN_CLOSED: break
     if events == "-TIPO-GARA-": window["-EXPORT-"].update(disabled = False)
     if events == "-CLR-OUT-": window["-OUTPUT-TERMINAL-"].update("")
-
-    #Aggiornamento dati sui pagamenti, gettoni.json: dati sui rimborsi; viaggi.json: distanze in KM dal luogo di gara
-    with open(f"{current_dir}/data/JSON/gettoni.json", "r") as f:
-      rimborsi = json.load(f)
-    viaggi = get_distance(..., values["-INDIRIZZO-GARA-"])
-    form_fields = list(fillpdfs.get_form_fields(f"{current_dir}/data/template.pdf").keys())
-
+    if events == "-LOAD-ROUTES-": viaggi = get_distance(partenze, values["-INDIRIZZO-GARA-"], window)
+    if events == "-RLD-CFG-": dit, partenze, rimborsi, form_fields = load_data()
     if events == "-EXPORT-":
       
+      benzina = float(values["-COSTO-BENZINA-"].replace(",", "."))
       nomegara = str(values["-NOME-GARA-"]).upper()
       tipogara = str(values["-TIPO-GARA-"]).upper()
       datagara = f"{values["-GIORNO-GARA-"]}/{values["-MESE-GARA-"]}/{values["-ANNO-GARA-"]}"
