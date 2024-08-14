@@ -1,0 +1,149 @@
+{
+    "REG": {
+        "DIRETTORE TORNEO": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 40,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
+        },
+        "COMPUTERISTA": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 40,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
+        },
+        "TECNICO ARMI": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 68
+        },
+        "ARBITRO INT.": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 40,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
+        },
+        "ARBITRO NAZ.": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 30,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
+        },
+        "ARBITRO ASP.": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 20,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
+        }
+    },
+    "INTREG": {
+        "DIRETTORE TORNEO": {
+            "COLAZIONE": 6,
+            "PRANZO": 27,
+            "CENA": 27,
+            "GETTONE": 40,
+            "PERNOTTO": 45,
+            "PRECENA": 27,
+            "PRENOTTE" : 45
+        },
+        "COMPUTERISTA": {
+            "COLAZIONE": 6,
+            "PRANZO": 27,
+            "CENA": 27,
+            "GETTONE": 40,
+            "PERNOTTO": 45,
+            "PRECENA": 27,
+            "PRENOTTE" : 45
+        },
+        "ARBITRO INT.": {
+            "COLAZIONE": 3,
+            "PRANZO": 21,
+            "CENA": 21,
+            "GETTONE": 40,
+            "PERNOTTO": 45,
+            "PRECENA": 21,
+            "PRENOTTE" : 45
+        },
+        "ARBITRO NAZ.": {
+            "COLAZIONE": 3,
+            "PRANZO": 21,
+            "CENA": 21,
+            "GETTONE": 30,
+            "PERNOTTO": 45,
+            "PRECENA": 21,
+            "PRENOTTE" : 45
+        },
+        "ARBITRO ASP.": {
+            "COLAZIONE": 3,
+            "PRANZO": 21,
+            "CENA": 21,
+            "GETTONE": 20,
+            "PERNOTTO": 45,
+            "PRECENA": 21,
+            "PRENOTTE" : 45
+        }
+    },
+    "NAZ": {
+        "DIRETTORE TORNEO": {
+            "COLAZIONE": 6,
+            "PRANZO": 30,
+            "CENA": 30,
+            "GETTONE": 75,
+            "PERNOTTO": 50,
+            "PRECENA": 30,
+            "PRENOTTE" : 50
+        },
+        "COMPUTERISTA": {
+            "COLAZIONE": 6,
+            "PRANZO": 30,
+            "CENA": 30,
+            "GETTONE": 75,
+            "PERNOTTO": 50,
+            "PRECENA": 30,
+            "PRENOTTE" : 50
+        },
+        "ARBITRO INT.": {
+            "COLAZIONE": 3,
+            "PRANZO": 25,
+            "CENA": 25,
+            "GETTONE": 75,
+            "PERNOTTO": 50,
+            "PRECENA": 25,
+            "PRENOTTE" : 50
+        },
+        "ARBITRO NAZ.": {
+            "COLAZIONE": 3,
+            "PRANZO": 25,
+            "CENA": 25,
+            "GETTONE": 50,
+            "PERNOTTO": 50,
+            "PRECENA": 25,
+            "PRENOTTE" : 50
+        },
+        "ARBITRO ASP.": {
+            "COLAZIONE": 3,
+            "PRANZO": 25,
+            "CENA": 25,
+            "GETTONE": 40,
+            "PERNOTTO": 50,
+            "PRECENA": 25,
+            "PRENOTTE" : 50
+        }
+    }
+}
