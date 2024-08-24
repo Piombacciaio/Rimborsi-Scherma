@@ -22,7 +22,10 @@
             "COLAZIONE": 2.5,
             "PRANZO": 15.5,
             "CENA": 15.5,
-            "GETTONE": 68
+            "GETTONE": 68,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
         },
         "ARBITRO INT.": {
             "COLAZIONE": 2.5,
@@ -71,6 +74,16 @@
             "PRECENA": 27,
             "PRENOTTE" : 45
         },
+        "TECNICO ARMI": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 68,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
+
+        },
         "ARBITRO INT.": {
             "COLAZIONE": 3,
             "PRANZO": 21,
@@ -117,6 +130,16 @@
             "PERNOTTO": 50,
             "PRECENA": 30,
             "PRENOTTE" : 50
+        },
+        "TECNICO ARMI": {
+            "COLAZIONE": 2.5,
+            "PRANZO": 15.5,
+            "CENA": 15.5,
+            "GETTONE": 68,
+            "PERNOTTO": 31,
+            "PRECENA": 15.5,
+            "PRENOTTE" : 31
+
         },
         "ARBITRO INT.": {
             "COLAZIONE": 3,

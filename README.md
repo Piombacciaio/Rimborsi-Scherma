@@ -11,8 +11,8 @@ The schema for `data/JSON/dt.json` is a list of dictionaries:
     {
         "Nome": "John",
         "Cognome": "Doe",
-        "DataNascita": "YYYY-MM-DDT00:00:00+01:00",
-        "DataRinnovo": "YYYY-MM-DDT00:00:00+01:00",
+        "DataNascita": "YYYY-MM-DD",
+        "DataRinnovo": "YYYY-MM-DD",
         "Domicilio": "Address",
         "Località": "PlaceOfResidence",
         "LuogoNascita": "PlaceOfBirth",
@@ -25,10 +25,11 @@ The schema for `data/JSON/dt.json` is a list of dictionaries:
 
 Values for `LuogoNascita` and `Domicilio` are sometimes Null as they are not mandatory to comunicate
 
-The time stamps in `DataNascita` and `DataRinnovo` aren't used for anything and they are a leftover from the database export that I will probably remove. (ETA: soon.tm)
-Same goes for `MaschioFemmina` that is a bool stored as a string
+`MaschioFemmina` being a bool stored as a string is a leftover from the database export that I will probably remove. (ETA: soon.tm)
 
 The keys for `data/template.pdf` are saved in `data/keys` so they shoud give an idea of what the document is like
+
+Disclaimer : data scraping such as the one used for maps distances is against the TOS, I therefore remove myself from any responsibility
 
 ## Requirements
 
