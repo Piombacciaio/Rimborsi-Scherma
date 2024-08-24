@@ -25,7 +25,7 @@ The schema for `data/JSON/dt.json` is a list of dictionaries:
 
 Values for `LuogoNascita` and `Domicilio` are sometimes Null as they are not mandatory to comunicate
 
-`MaschioFemmina` being a bool stored as a string is a leftover from the database export that I will probably remove. (ETA: soon.tm)
+`MaschioFemmina` being a bool stored as a string is a leftover from the database export that I will probably fix. (ETA: soon.tm)
 
 The keys for `data/template.pdf` are saved in `data/keys` so they shoud give an idea of what the document is like
 
