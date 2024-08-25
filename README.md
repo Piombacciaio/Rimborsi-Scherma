@@ -6,26 +6,24 @@ For privacy reasons some files are missing (e.g. `data/JSON/dt.json` and `data/t
 
 The schema for `data/JSON/dt.json` is a list of dictionaries:
 
-```json
+```jsonc
 [
     {
-        "Nome": "John",
+        "Nome": "John", 
         "Cognome": "Doe",
         "DataNascita": "YYYY-MM-DD",
         "DataRinnovo": "YYYY-MM-DD",
-        "Domicilio": "Address",
-        "Località": "PlaceOfResidence",
-        "LuogoNascita": "PlaceOfBirth",
-        "MaschioFemmina": "false",
-        "NumFIS": "xxxxxx",
-        "Qualifica": "COMPUTERISTA"
+        "Domicilio": "Address", //or null
+        "Località": "CityOfResidence",
+        "LuogoNascita": "ProvinceOfBirth", //or null, used to calculate tax code
+        "MaschioFemmina": false, //false if male, true if female
+        "NumFIS": "xxxxxx", //6 digits identifier used by Italian Fencing Federation
+        "Qualifica": "COMPUTERISTA" //Role of the person. Valid roles are: DIRETTORE TORNEO, COMPUTERISTA, TECNICO ARMI, ARBITRO INT., ARBITRO NAZ., ARBITRO ASP.
     },
 ]
 ```
 
-Values for `LuogoNascita` and `Domicilio` are sometimes Null as they are not mandatory to comunicate
-
-`MaschioFemmina` being a bool stored as a string is a leftover from the database export that I will probably fix. (ETA: soon.tm)
+Values for `LuogoNascita` and `Domicilio` are sometimes null as they are not mandatory to comunicate
 
 The keys for `data/template.pdf` are saved in `data/keys` so they shoud give an idea of what the document is like
 

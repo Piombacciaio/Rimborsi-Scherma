@@ -175,7 +175,7 @@ def main():
       nuovo_arbitro["DataRinnovo"] = f"{values["-ANNO-RINNOVO-NUOVO-DIT-"]}-{values["-MESE-RINNOVO-NUOVO-DIT-"]}-{values["-GIORNO-RINNOVO-NUOVO-DIT-"]}"
       nuovo_arbitro["Località"] = values["-LOCALITA-NUOVO-DIT-"].upper()
       nuovo_arbitro["LuogoNascita"] = values["-NASCITA-NUOVO-DIT-"] if values["-NASCITA-NUOVO-DIT-"] != "" else None.upper()
-      nuovo_arbitro["MaschioFemmina"] = "false" if not values["-SESSO-NUOVO-DIT-"] else "true"
+      nuovo_arbitro["MaschioFemmina"] = values["-SESSO-NUOVO-DIT-"]
       nuovo_arbitro["Nome"] = values["-NOME-NUOVO-DIT-"].upper()
       nuovo_arbitro["NumFIS"] = values["-NUMERO-FIS-NUOVO-DIT-"]
       nuovo_arbitro["Qualifica"] = values["-QUALIFICA-NUOVO-DIT-"].upper()
@@ -204,7 +204,7 @@ def main():
             datanascita = person["DataNascita"]
             a,m,g = datanascita.split("-")
             datanascita = f'{g}/{m}/{a}'
-            mf = True if person["MaschioFemmina"] == "true" else False
+            mf = person["MaschioFemmina"]
             if person["LuogoNascita"] != None:
               nascita = person["LuogoNascita"] + ', ' + datanascita
               codf = cf.calcolo_codice(person["Cognome"], person["Nome"], g, m, a, person["LuogoNascita"], mf)
