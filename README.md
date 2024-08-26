@@ -1,4 +1,4 @@
-# Compensi scherma
+# Rimborsi scherma
 
 This script helps me automate some of the most tedious work as a computer technician for fencing competitions: making payment documents for all the people involved.
 
