@@ -6,7 +6,8 @@ with open("dt.json", "r", encoding="utf-8") as f:
 locs:list[str] = []
 for x in arbitri:
     if x["Località"] not in locs:
-        locs.append(x["Località"])
+        locs.append(x["Località"].capitalize())
 
-with open("Città.json", "w") as f:
-    json.dump(locs, f)
+locs.sort()
+with open("città.json", "w", encoding="utf-8") as f:
+    json.dump(locs, f, indent=4, ensure_ascii=False)

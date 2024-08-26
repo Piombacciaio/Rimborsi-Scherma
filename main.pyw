@@ -57,7 +57,7 @@ def load_data(directory):
   #Load data for referees, origins, payments and template
   with open(f"{directory}/data/JSON/dt.json", "r", encoding="utf-8") as f:
     dit = json.load(f)
-  with open(f"{directory}/data/JSON/Città.json", "r", encoding="utf-8") as f:
+  with open(f"{directory}/data/JSON/città.json", "r", encoding="utf-8") as f:
     origins = json.load(f)
   with open(f"{directory}/data/JSON/gettoni.json", "r") as f:
     payments = json.load(f)
@@ -152,6 +152,9 @@ def main():
   current_month = today.month
   current_day = today.day
   current_dir, _ = str(os.path.realpath(__file__)).replace("\\", "/").rsplit("/", 1)
+  dit:list[dict]
+  origins:list[str]
+  payments:dict[dict]
   dit, origins, payments, form_fields = load_data(current_dir)
 
   default_view = create_view(current_year, current_month, current_day, dit)
@@ -180,8 +183,14 @@ def main():
       new_referee["NumFIS"] = values["-NEW-REFEREE-FIS-ID-"]
       new_referee["Qualifica"] = values["-NEW-REFEREE-ROLE-"].upper()
       dit.append(new_referee)
+      dit = sorted(dit, key=lambda d: d['Cognome'])
       with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
         json.dump(dit, f, sort_keys=True, indent=4, ensure_ascii=False)
+      if new_referee["LuogoNascita"] not in origins and new_referee["LuogoNascita"] != None:
+        origins.append(new_referee["LuogoNascita"])
+        origins.sort()
+        with open(f"{current_dir}/data/JSON/città.json", "w", encoding="utf-8") as f:
+          json.dump(origins, f, indent=4, ensure_ascii=False)
       window.close()
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), finalize=True, keep_on_top=True) #Re-create window to update referees tab 
 
@@ -272,3 +281,4 @@ def main():
 
 if __name__ == "__main__":
   main()
+  quit(0)
