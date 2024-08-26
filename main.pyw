@@ -72,7 +72,11 @@ def create_dit_tab(dit):
     PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(15,0))] for person in dit)
   return [
     [PSG.Text("Conv."), PSG.Push(), PSG.Text("Arbitro"), PSG.Push(), PSG.Text("Giorni "), PSG.Text("Extra"), PSG.Text("   ")],
-    [PSG.Column(dit_list, s=(1,350), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")]
+    [PSG.Column(dit_list, s=(1,300), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")],
+    [PSG.Text("Pozzo Aggiornato"), 
+     PSG.Input("", disabled=True, expand_x=True, key="-UPDATED-REPO-", enable_events=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white"), 
+     PSG.FileBrowse("Apri", file_types=(("FIS_REPO files", "*.fis_repo"),("ALL files", "*.*")), button_color="gray")], #note: fis_repo is a normal json with a specific schema, see README.md
+     [PSG.Button("Aggiorna Dati", key="-UPDATE-DIT-", button_color="gray", disabled=True, s=(13,1))]
   ]
 
 def create_view(year, month, day, dit):
@@ -152,6 +156,7 @@ def main():
   current_month = today.month
   current_day = today.day
   current_dir, _ = str(os.path.realpath(__file__)).replace("\\", "/").rsplit("/", 1)
+  
   dit:list[dict]
   origins:list[str]
   payments:dict[dict]
@@ -160,17 +165,33 @@ def main():
   default_view = create_view(current_year, current_month, current_day, dit)
 
   window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", default_view, finalize=True, keep_on_top=True)
+  
   while True:
 
     events, values = window.read()
+    
     if events == PSG.WIN_CLOSED: break
-    if events == "-COMPETITION-TYPE-": window["-EXPORT-"].update(disabled = False)
+    
     if events == "-CLR-OUT-": window["-OUTPUT-TERMINAL-"].update("")
+    if events == "-COMPETITION-TYPE-": window["-EXPORT-"].update(disabled = False)
+    #if events == "-DEBUG-": print("Hi!") #Left this here even if not needed 'cause my best friend (she made this) was extremely proud of her work
+    if events == "-RLD-CFG-": dit, origins, payments, form_fields = load_data(current_dir)
+    if events == "-UPDATED-REPO-": window["-UPDATE-DIT-"].update(disabled=False)
+    
     if events == "-LOAD-ROUTES-": 
       journeys = {}
       Thread(target=get_distance, args=[origins, values["-COMPETITION-ADDRESS-"], window, journeys]).start() #Moved get_distance to a separate Thread to avoid freezing the window
-    if events == "-RLD-CFG-": dit, origins, payments, form_fields = load_data(current_dir)
-    #if events == "-DEBUG-": print("Hi!") #Left this here even if not needed 'cause my best friend (she made this) was extremely proud of her work
+    
+    if events == "-UPDATE-DIT-": 
+      with open(values["-UPDATED-REPO-"], "r", encoding="utf-8") as f:
+        new_repo = json.load(f)
+      for person in dit:
+        updated = next(filter(lambda new_data: new_data['NumFIS'] == person["NumFIS"], new_repo["Tesserati"]), None)
+        if updated != None:
+          person["DataRinnovo"] = updated["DataRinnovo"]
+      with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
+        json.dump(dit, f, sort_keys=True, indent=4, ensure_ascii=False)
+  
     if events == "-ADD-NEW-REFEREE-":
       new_referee = {}
       new_referee["Cognome"] = values["-NEW-REFEREE-SURNAME-"].upper()
@@ -193,8 +214,6 @@ def main():
           json.dump(origins, f, indent=4, ensure_ascii=False)
       window.close()
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), finalize=True, keep_on_top=True) #Re-create window to update referees tab 
-
-
 
     if events == "-EXPORT-":
       

@@ -27,7 +27,37 @@ Values for `LuogoNascita` and `Domicilio` are sometimes null as they are not man
 
 The keys for `data/template.pdf` are saved in `data/keys` so they shoud give an idea of what the document is like
 
-Disclaimer : data scraping such as the one used for maps distances is against the TOS, I therefore remove myself from any responsibility
+Disclaimer: data scraping such as the one used for maps distances is against the TOS, I therefore remove myself from any responsibility of misuse
+
+The schema for `*.fis_repo` files is:
+
+```jsonc
+{   
+    "Tesserati": [
+        {
+            "Nome": "JHON", //Name of the person
+            "Cognome": "DOE", //Surname of the person
+            "CatAtleti": "0", //0-9 number used to identify the category
+            "CodSoc": "xxxxxx", //2-6 digits number to uniquely identify any club affiliated with the Italian Fencing Federation
+            "DataNascita": "YYYY-MM-DD", //Date of birth
+            "DataRinnovo": "YYYY-MM-DD", //Date of renewal
+            "Località": "CityOfResidence",
+            "LuogoNascita": "ProvinceOfBirth", //or null if born out of Italy
+            "MaschioFemmina": false, //false if male, true if female
+            "NumFIS": "xxxxxx" //6 digits number to uniquely identify any person affiliated with the Italian Fencing Federation
+        },
+    ],
+    "Societa": [
+        {
+            "CodSoc": "xxxxxx", //2-6 digits number to uniquely identify any club affiliated with the Italian Fencing Federation
+            "DataScadenza": "YYYY-MM-DD", //Date of expiry of affiliation
+            "Denominazione": "FullNameOfClub",
+            "Località": "ProvinceOfOperation",
+            "Sigla": "ABCDE" //4-5 characters to uniquely identify any club during competitions
+        },
+    ]
+}
+```
 
 ## Requirements
 
