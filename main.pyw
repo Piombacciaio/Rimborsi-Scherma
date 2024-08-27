@@ -11,7 +11,7 @@ from threading import Thread
 def icon():
   return b'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'
   
-def get_distance(origins: list[str]|str, destination:str, window, journeys):
+def get_distance(origins: list[str]|str, destination:str, window:PSG.Window, journeys:dict[str,float]) -> None:
   try:
     #URL Encode
     url_origins:list[str] = []
@@ -56,7 +56,7 @@ def get_distance(origins: list[str]|str, destination:str, window, journeys):
   except Exception as e:
     window["-OUTPUT-TERMINAL-"].update(f"Error Loading Routes: {e}\n", text_color_for_value="red", append=True)
 
-def load_data(directory):
+def load_data(directory:str, window: PSG.Window = None) -> tuple[list[dict], list[str], dict[str, dict], list]:
   #Load data for referees, origins, payments and template
   with open(f"{directory}/data/JSON/dt.json", "r", encoding="utf-8") as f:
     dit = json.load(f)
@@ -65,9 +65,10 @@ def load_data(directory):
   with open(f"{directory}/data/JSON/gettoni.json", "r") as f:
     payments = json.load(f)
   form_fields = list(fillpdfs.get_form_fields(f"{directory}/data/template.pdf").keys())
+  if window != None: window["-OUTPUT-TERMINAL-"].update(f"Loaded Data\n", text_color_for_value="green", append=True)
   return dit, origins, payments, form_fields
 
-def create_dit_tab(dit):
+def create_dit_tab(dit:list[dict]) -> list:
   dit_list = ([
     PSG.Checkbox(text="", key=f"-SUMMONED-{person["NumFIS"]}-", s=(1,1)), 
     PSG.Text(f"{person["Cognome"]} {person["Nome"]}",s=(40,1)),
@@ -82,7 +83,7 @@ def create_dit_tab(dit):
      [PSG.Button("Aggiorna Dati", key="-UPDATE-DIT-", button_color="gray", disabled=True, s=(13,1))]
   ]
 
-def create_view(year, month, day, dit):
+def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.TabGroup]]:
 
   year_list = [x for x in range(year - 1, year + 2)][::-1]
 
@@ -178,7 +179,7 @@ def main():
     if events == "-CLR-OUT-": window["-OUTPUT-TERMINAL-"].update("")
     if events == "-COMPETITION-TYPE-": window["-EXPORT-"].update(disabled = False)
     #if events == "-DEBUG-": print("Hi!") #Left this here even if not needed 'cause my best friend (she made this) was extremely proud of her work
-    if events == "-RLD-CFG-": dit, origins, payments, form_fields = load_data(current_dir)
+    if events == "-RLD-CFG-": dit, origins, payments, form_fields = load_data(current_dir, window)
     if events == "-UPDATED-REPO-": window["-UPDATE-DIT-"].update(disabled=False)
     
     if events == "-LOAD-ROUTES-": 
@@ -216,7 +217,7 @@ def main():
         with open(f"{current_dir}/data/JSON/città.json", "w", encoding="utf-8") as f:
           json.dump(origins, f, indent=4, ensure_ascii=False)
       window.close()
-      window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), finalize=True, keep_on_top=True) #Re-create window to update referees tab 
+      window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True) #Re-create window to update referees tab 
 
     if events == "-EXPORT-":
       
