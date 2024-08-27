@@ -6,3 +6,6 @@ env
 Export
 pozzo.json
 TODO*
+*.png
+*.ico
+*.fis_repo
