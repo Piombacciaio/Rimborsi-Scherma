@@ -1,7 +1,10 @@
 import datetime as dt, json, math, os, PySimpleGUI as PSG
 import data.cf as cf
 import urllib.parse
+if os.name == "nt": import win32com.client as win32
 from fillpdf import fillpdfs
+from openpyxl import load_workbook
+from openpyxl.styles import Font
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -48,13 +51,13 @@ def get_distance(origins: list[str]|str, destination:str, window:PSG.Window, jou
         place = urllib.parse.unquote_plus(place)
         journeys[place.upper()] = float(distance.replace(",", "."))
       except Exception as e:
-        window["-OUTPUT-TERMINAL-"].update(f"Exception encountered while fetching distance from {place}: {e}\n", text_color_for_value="yellow", append=True)
+        window["-OUTPUT-TERMINAL-"].update(f"Errore nel calcolo della tratta da {place}: {e}\n", text_color_for_value="yellow", append=True)
         place = urllib.parse.unquote_plus(place)
         journeys[place.upper()] = 0
-    window["-OUTPUT-TERMINAL-"].update(f"Loaded Routes\n", text_color_for_value="green", append=True)
+    window["-OUTPUT-TERMINAL-"].update(f"Tratte caricate correttamente\n", text_color_for_value="green", append=True)
     driver.quit()
   except Exception as e:
-    window["-OUTPUT-TERMINAL-"].update(f"Error Loading Routes: {e}\n", text_color_for_value="red", append=True)
+    window["-OUTPUT-TERMINAL-"].update(f"Il caricamento delle tratte ha causato il seguente errore {e}\n", text_color_for_value="red", append=True)
 
 def load_data(directory:str, window: PSG.Window = None) -> tuple[list[dict], list[str], dict[str, dict], list]:
   #Load data for referees, origins, payments and template
@@ -64,11 +67,12 @@ def load_data(directory:str, window: PSG.Window = None) -> tuple[list[dict], lis
     origins = json.load(f)
   with open(f"{directory}/data/JSON/gettoni.json", "r") as f:
     payments = json.load(f)
-  form_fields = list(fillpdfs.get_form_fields(f"{directory}/data/template.pdf").keys())
-  if window != None: window["-OUTPUT-TERMINAL-"].update(f"Loaded Data\n", text_color_for_value="green", append=True)
+  form_fields = list(fillpdfs.get_form_fields(f"{directory}/data/template_rimborso.pdf").keys())
+  if window != None: window["-OUTPUT-TERMINAL-"].update(f"Dati aggiornati\n", text_color_for_value="green", append=True)
   return dit, origins, payments, form_fields
 
 def create_dit_tab(dit:list[dict]) -> list:
+  tooltip = "Pozzo aggiornato con le nuove date di rinnovo del tesseramento"
   dit_list = ([
     PSG.Checkbox(text="", key=f"-SUMMONED-{person["NumFIS"]}-", s=(1,1)), 
     PSG.Text(f"{person["Cognome"]} {person["Nome"]}",s=(40,1)),
@@ -77,21 +81,24 @@ def create_dit_tab(dit:list[dict]) -> list:
   return [
     [PSG.Text("Conv."), PSG.Push(), PSG.Text("Arbitro"), PSG.Push(), PSG.Text("Giorni "), PSG.Text("Extra"), PSG.Text("   ")],
     [PSG.Column(dit_list, s=(1,300), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")],
-    [PSG.Text("Pozzo Aggiornato"), 
-     PSG.Input("", disabled=True, expand_x=True, key="-UPDATED-REPO-", enable_events=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white"), 
-     PSG.FileBrowse("Apri", file_types=(("FIS_REPO files", "*.fis_repo"),("ALL files", "*.*")), button_color="gray")], #note: fis_repo is a normal json with a specific schema, see README.md
+    [PSG.Text("Pozzo Aggiornato", tooltip=tooltip), 
+     PSG.Input("", disabled=True, expand_x=True, key="-UPDATED-REPO-", tooltip=tooltip, enable_events=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white"), 
+     PSG.FileBrowse("Apri", file_types=(("FIS_REPO files", "*.fis_repo"),), tooltip=tooltip, button_color="gray")], #note: fis_repo is a normal json with a specific schema, see README.md
      [PSG.Button("Aggiorna Dati", key="-UPDATE-DIT-", button_color="gray", disabled=True, s=(13,1))]
   ]
 
 def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.TabGroup]]:
 
+  def empty_line():
+    return PSG.Text("void", text_color="black")
+
   year_list = [x for x in range(year - 1, year + 2)][::-1]
 
   home_tab = [
-    [PSG.Text("Nome Gara", s=(11,1)), PSG.Input("Nome in locandina", key="-COMPETITION-NAME-", s=(50,1))], 
+    [PSG.Text("Nome Gara", s=(11,1)), PSG.Input("Nome in locandina", key="-COMPETITION-NAME-", s=(55,1))], 
     [PSG.Text("Tipo Gara", s=(11,1)), PSG.Combo(["REG", "INTREG", "NAZ"], "Tipo", s=(8,1), key="-COMPETITION-TYPE-", button_background_color="gray", button_arrow_color="white", enable_events=True)],
-    [PSG.Text("Città Gara", s=(11,1)), PSG.Input("Città", key="-COMPETITION-PLACE-", s=(50,1))], 
-    [PSG.Text("Indirizzo Gara", s=(11,1)), PSG.Input("Via", key="-COMPETITION-ADDRESS-", s=(37,1)), PSG.Button("Load routes", key="-LOAD-ROUTES-", button_color="gray", pad=(10,0))], 
+    [PSG.Text("Città Gara", s=(11,1)), PSG.Input("Città", key="-COMPETITION-PLACE-", s=(55,1))], 
+    [PSG.Text("Indirizzo Gara", s=(11,1)), PSG.Input("Via", key="-COMPETITION-ADDRESS-", s=(41,1)), PSG.Button("Calcola Tratte", key="-LOAD-ROUTES-", button_color="gray", pad=(6,0))], 
     [PSG.Text("Data Gara", s=(11,1)), 
     PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="Giorno", key="-COMPETITION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
@@ -111,10 +118,10 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     PSG.Text("/"),
     PSG.Combo(year_list, default_value=year, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", key="-GAS-PRICE-", s=(5,1)), PSG.Text("€/L")],
-    [PSG.Button("Export", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Push(), PSG.Button("Reload config", key="-RLD-CFG-", button_color="gray")],
-    [PSG.Text("Output")],
-    [PSG.Multiline(disabled=True, no_scrollbar=True, autoscroll=True, expand_x=True, auto_refresh=True, s=(1, 5), key="-OUTPUT-TERMINAL-")],
-    [PSG.Button("Clear output", key="-CLR-OUT-", button_color="gray")],
+    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Push(), PSG.Button("Ricarica Config", key="-RLD-CFG-", button_color="gray")],
+    [PSG.Text("Output"), PSG.Line()],
+    [PSG.Multiline(disabled=True, autoscroll=True, expand_x=True, auto_refresh=True, s=(1, 6), key="-OUTPUT-TERMINAL-", sbar_arrow_color="white", sbar_background_color="grey")],
+    [PSG.Button("Cancella Output", key="-CLR-OUT-", button_color="gray")],
     #[PSG.Button("Button", key="-DEBUG-")]
   ]
   dit_tab = create_dit_tab(dit)
@@ -124,12 +131,14 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     [PSG.Text("Cognome", s=(15,1)), PSG.Input("Cognome Arbitro", key="-NEW-REFEREE-SURNAME-", s=(50,1), p=(10,0))],
     [PSG.Text("Femmina", s=(15,1)), PSG.Checkbox(text="", key="-NEW-REFEREE-SEX-")],
     [PSG.Text("Luogo Residenza", s=(15,1)), PSG.Input("Comune residenza", key="-NEW-REFEREE-RESIDENCE-", s=(50,1), p=(10,0))],
+    [empty_line()],
     [PSG.Text("Dati anagrafici"), PSG.Line()],
     [PSG.Text("Luogo Nascita", s=(15,1)), PSG.Input("Comune nascita", key="-NEW-REFEREE-BIRTH-PLACE-", s=(50,1), p=(10,0))],
     [PSG.Text("Data Nascita", s=(15,1)), 
      PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-BIRTH-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
      PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-BIRTH-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 80, year)][::-1], "Anno", key="-NEW-REFEREE-BIRTH-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
+    [empty_line()],
     [PSG.Text("Dati Federazione"), PSG.Line()],
     [PSG.Text("Numero FIS", s=(15,1)), PSG.Input("000000", key="-NEW-REFEREE-FIS-ID-", s=(50,1), p=(10,0))],
     [PSG.Text("Data Rinnovo", s=(15,1)), 
@@ -151,6 +160,74 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
   ]
 
   return default_view
+
+def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, summon_year:str, competition_name:str,
+                        competition_day:str, competition_month:str, competition_year:str, competition_place:str, 
+                        precomp_tech:list, directors:list, comp_techs:list, referees:list, current_dir:str) -> None:
+  
+  try:
+
+    window["-OUTPUT-TERMINAL-"].update(f"Creazione di CONVOCAZIONE\n", text_color_for_value="green", append=True)
+    if len(referees) > 30:
+      window["-OUTPUT-TERMINAL-"].update(f"Troppi arbitri convocati per il template, compilazione manuale richiesta\n", text_color_for_value="yellow", append=True)
+      return
+    competition_place_cell = competition_place.upper()
+    summon_cell = f"MILANO {summon_day}-{summon_month}-{summon_year}"
+    competition_cell = f"{competition_place_cell} {competition_day}-{competition_month}-{competition_year}"
+    precomp_cell = "; ".join(precomp_tech)
+    directors_cell = "; ".join(directors)
+    comp_techs_cell = "; ".join(comp_techs)
+
+    workbook = load_workbook(f"data/template_convocazione.xlsx")
+    sheet = workbook["template"]
+
+    sheet["F11"] = summon_cell
+    sheet["B13"] = competition_name.capitalize()
+    sheet["B13"].font = Font(bold=True)
+    sheet["B14"] = competition_cell
+    sheet["C19"] = precomp_cell
+    sheet["C19"].font = Font(bold=True)
+    sheet["C20"] = directors_cell
+    sheet["C20"].font = Font(bold=True)
+    sheet["C21"] = comp_techs_cell
+    sheet["C21"].font = Font(bold=True)
+    sheet["A37"] = competition_place_cell
+
+    ref_cols = ['B', 'C', 'D']
+    ref_start_row = 25
+    i = 0
+
+    #Ensure the table is empty
+    for col in ref_cols:
+      for row in range(ref_start_row, ref_start_row + 10):
+        sheet[f"{col}{row}"] = ""
+
+    #Populate table with all ref names
+    for col in ref_cols:
+      for row in range(ref_start_row, ref_start_row + 10):
+        if i < len(referees):
+          sheet[f"{col}{row}"] = referees[i]
+          i += 1
+        else:
+          break
+    
+    if os.name == "nt":
+      workbook.save(f"data/template_convocazione.xlsx")
+      excel = win32.Dispatch('Excel.Application')
+      workbook = excel.Workbooks.Open(f"{current_dir}/data/template_convocazione.xlsx")
+      sheet = workbook.Worksheets(1)
+      sheet.PageSetup.Orientation = 2
+      pdf_path = f"{current_dir}/Export/CONVOCAZIONE.pdf"
+      workbook.ExportAsFixedFormat(0, pdf_path)
+      workbook.Close(False)
+      excel.Quit()
+      window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE completata correttamente\n", text_color_for_value="green", append=True)
+    else:
+      workbook.save("CONVOCAZIONE.xlsx")
+      window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE.xlsx completata correttamente. Procedere all'esportazione in PDF\n", text_color_for_value="yellow", append=True)
+  
+  except Exception as e:
+    window["-OUTPUT-TERMINAL-"].update(f"La creazione di CONVOCAZIONE ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
 
 def main():
   PSG.theme("DarkBlack")
@@ -220,7 +297,11 @@ def main():
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True) #Re-create window to update referees tab 
 
     if events == "-EXPORT-":
-      
+      comp_techs = []
+      precomp_tech = []
+      directors = []
+      referees = []
+
       gas = float(str(values["-GAS-PRICE-"]).replace(",", "."))
       competition_name = str(values["-COMPETITION-NAME-"]).upper()
       competition_type = str(values["-COMPETITION-TYPE-"]).upper()
@@ -232,7 +313,7 @@ def main():
         try:
           if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
             referee_name = person["Cognome"] + ' ' + person["Nome"]
-            window["-OUTPUT-TERMINAL-"].update(f"Adding {referee_name} to export\n", text_color_for_value="green", append=True)
+            window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name}\n", text_color_for_value="green", append=True)
             referee_birthday = person["DataNascita"]
             year, month, day = referee_birthday.split("-")
             referee_birthday = f'{day}/{month}/{year}'
@@ -248,6 +329,10 @@ def main():
             except KeyError: referee_residence_address = " "
                   
             referee_role = person["Qualifica"]
+            if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
+            if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
+            if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
+            if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
             days = int(values[f"-DAYS-{person["NumFIS"]}-"])
             token_value = payments[competition_type][referee_role]["GETTONE"]
             total_token_value = str(int(days) * int(token_value))
@@ -296,11 +381,15 @@ def main():
               form_fields[19]: renewal_date,
             }
 
-            fillpdfs.write_fillable_pdf('data/template.pdf',f'Export/{referee_name}.pdf', datadict)
-            window["-OUTPUT-TERMINAL-"].update(f"Added {referee_name}\n", text_color_for_value="green", append=True)
+            fillpdfs.write_fillable_pdf('data/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
+            window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
 
         except Exception as e:
-          window["-OUTPUT-TERMINAL-"].update(f"Adding {referee_name} raised the following error ({e})\n", text_color_for_value="red", append=True)
+          window["-OUTPUT-TERMINAL-"].update(f"La creazione di {referee_name} ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
+
+      fill_summoning_xlsx(window, values["-CONVOCATION-DAY-"], values["-CONVOCATION-MONTH-"], values["-CONVOCATION-YEAR-"],
+                          values["-COMPETITION-NAME-"], values["-COMPETITION-DAY-"], values["-COMPETITION-MONTH-"], values["-COMPETITION-YEAR-"],
+                          values["-COMPETITION-PLACE-"], precomp_tech, directors, comp_techs, referees, current_dir)
 
 if __name__ == "__main__":
   main()

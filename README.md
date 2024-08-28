@@ -64,3 +64,4 @@ The schema for `*.fis_repo` files is:
 - [Python 3.x](https://www.python.org/downloads/)
 - pip requirements (`pip install -U -r requirements.txt`)
 - Internet connection (Google Maps Scraper)
+- Excel (Export to pdf, as of now windows only)
