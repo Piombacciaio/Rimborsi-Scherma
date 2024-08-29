@@ -156,7 +156,8 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
           [PSG.Tab("Nuovo Arbitro", new_dit_tab)]
         ]
       )
-    ]
+    ],
+    [PSG.Button("Salva Configurazione", key="-SAVE-CONFIG-", button_color="gray"), PSG.Button("Carica Configurazione", key="-LOAD-CONFIG-", button_color="gray")]
   ]
 
   return default_view
@@ -178,7 +179,7 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
     directors_cell = "; ".join(directors)
     comp_techs_cell = "; ".join(comp_techs)
 
-    workbook = load_workbook(f"data/template_convocazione.xlsx")
+    workbook = load_workbook(f"{current_dir}/data/template_convocazione.xlsx")
     sheet = workbook["template"]
 
     sheet["F11"] = summon_cell
@@ -212,7 +213,7 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
           break
     
     if os.name == "nt":
-      workbook.save(f"data/template_convocazione.xlsx")
+      workbook.save(f"{current_dir}/data/template_convocazione.xlsx")
       excel = win32.Dispatch('Excel.Application')
       workbook = excel.Workbooks.Open(f"{current_dir}/data/template_convocazione.xlsx")
       sheet = workbook.Worksheets(1)
@@ -228,6 +229,33 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
   
   except Exception as e:
     window["-OUTPUT-TERMINAL-"].update(f"La creazione di CONVOCAZIONE ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
+
+def save_config(window:PSG.Window, current_dir:str, dit:list[dict], values:dict[str], journeys:dict):
+  summoned = {}
+  for person in dit:
+    if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
+      summoned[person["NumFIS"]] = {}
+      summoned[person["NumFIS"]]["Giorni"] = values[f"-DAYS-{person["NumFIS"]}-"]
+      summoned[person["NumFIS"]]["Extra"] = values[f"-EXTRA-{person["NumFIS"]}-"]
+  
+  with open(f"{current_dir}/data/rimborsi.save_conf", "r", encoding="utf-8") as f:
+    savefile = json.load(f)
+
+  savefile["NomeGara"] = values["-COMPETITION-NAME-"].upper()
+  savefile["TipoGara"] = values["-COMPETITION-TYPE-"].upper()
+  savefile["CittàGara"] = values["-COMPETITION-PLACE-"].upper()
+  savefile["IndirizzoGara"] = values["-COMPETITION-ADDRESS-"].capitalize()
+  savefile["Tratte"] = journeys
+  savefile["DataGara"] = f"{values["-COMPETITION-DAY-"]}-{values["-COMPETITION-MONTH-"]}-{values["-COMPETITION-YEAR-"]}"
+  savefile["DataConv"] = f"{values["-CONVOCATION-DAY-"]}-{values["-CONVOCATION-MONTH-"]}-{values["-CONVOCATION-YEAR-"]}"
+  savefile["DataFirma"] = f"{values["-SIGN-DAY-"]}-{values["-SIGN-MONTH-"]}-{values["-SIGN-YEAR-"]}"
+  savefile["CostoBenzina"] = values["-GAS-PRICE-"]
+  savefile["ArbitriConv"] = summoned
+
+  with open(f"{current_dir}/data/rimborsi.save_conf", "w", encoding="utf-8") as f:
+    json.dump(savefile, f, indent=4, ensure_ascii=False)
+      
+  window["-OUTPUT-TERMINAL-"].update(f"Configurazione salvata correttamente\n", text_color_for_value="green", append=True)
 
 def main():
   PSG.theme("DarkBlack")
@@ -297,99 +325,143 @@ def main():
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True) #Re-create window to update referees tab 
 
     if events == "-EXPORT-":
-      comp_techs = []
-      precomp_tech = []
-      directors = []
-      referees = []
+      if journeys != {}:
 
-      gas = float(str(values["-GAS-PRICE-"]).replace(",", "."))
-      competition_name = str(values["-COMPETITION-NAME-"]).upper()
-      competition_type = str(values["-COMPETITION-TYPE-"]).upper()
-      competition_date = f"{values["-COMPETITION-DAY-"]}/{values["-COMPETITION-MONTH-"]}/{values["-COMPETITION-YEAR-"]}"
-      convocation = f"{values["-CONVOCATION-DAY-"]}/{values["-CONVOCATION-MONTH-"]}/{values["-CONVOCATION-YEAR-"]}"
-      competition_place = place = str(values["-COMPETITION-PLACE-"]).upper()
-      sign_date = f"{values["-SIGN-DAY-"]}/{values["-SIGN-MONTH-"]}/{values["-SIGN-YEAR-"]}"
-      for person in dit:
-        try:
-          if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
-            referee_name = person["Cognome"] + ' ' + person["Nome"]
-            window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name}\n", text_color_for_value="green", append=True)
-            referee_birthday = person["DataNascita"]
-            year, month, day = referee_birthday.split("-")
-            referee_birthday = f'{day}/{month}/{year}'
-            sex = person["MaschioFemmina"]
-            if person["LuogoNascita"] != None:
-              referee_birth_place = person["LuogoNascita"] + ', ' + referee_birthday
-              referee_tax_code = cf.calcolo_codice(person["Cognome"], person["Nome"], day, month, year, person["LuogoNascita"], sex)
-            else:
-              referee_birth_place = " "
-              referee_tax_code = " "
-                  
-            try: referee_residence_address = person["Domicilio"] 
-            except KeyError: referee_residence_address = " "
-                  
-            referee_role = person["Qualifica"]
-            if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
-            if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
-            if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
-            if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
-            days = int(values[f"-DAYS-{person["NumFIS"]}-"])
-            token_value = payments[competition_type][referee_role]["GETTONE"]
-            total_token_value = str(int(days) * int(token_value))
-            if values[f"-EXTRA-{person["NumFIS"]}-"] == True: total_token_value = str(int(total_token_value)+token_value)
+        comp_techs = []
+        precomp_tech = []
+        directors = []
+        referees = []
 
-            travel_distance = math.ceil(journeys[person["Località"].upper()])
-            if travel_distance < 50: journey = math.ceil(gas / 10 * 2 * days * travel_distance)
-            else: journey = math.ceil(gas / 10 * 2 * travel_distance)
-            
-            breakfast_number = (1 * days) if travel_distance > 10 else 0
-            meal_number = (2 * days) if travel_distance < 100 else (2 * days + 1)
-            breakfast_value = payments[competition_type][referee_role]["COLAZIONE"]
-            meal_value = payments[competition_type][referee_role]["PRANZO"]
-            meals = breakfast_number * breakfast_value + meal_number * meal_value
+        gas = float(values["-GAS-PRICE-"].replace(",", "."))
+        competition_name = values["-COMPETITION-NAME-"].upper()
+        competition_type = values["-COMPETITION-TYPE-"].upper()
+        competition_date = f"{values["-COMPETITION-DAY-"]}/{values["-COMPETITION-MONTH-"]}/{values["-COMPETITION-YEAR-"]}"
+        convocation = f"{values["-CONVOCATION-DAY-"]}/{values["-CONVOCATION-MONTH-"]}/{values["-CONVOCATION-YEAR-"]}"
+        competition_place = place = str(values["-COMPETITION-PLACE-"]).upper()
+        sign_date = f"{values["-SIGN-DAY-"]}/{values["-SIGN-MONTH-"]}/{values["-SIGN-YEAR-"]}"
+        for person in dit:
+          try:
+            if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
+              referee_name = person["Cognome"] + ' ' + person["Nome"]
+              window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name}\n", text_color_for_value="green", append=True)
+              referee_birthday = person["DataNascita"]
+              year, month, day = referee_birthday.split("-")
+              referee_birthday = f'{day}/{month}/{year}'
+              sex = person["MaschioFemmina"]
+              if person["LuogoNascita"] != None:
+                referee_birth_place = person["LuogoNascita"] + ', ' + referee_birthday
+                referee_tax_code = cf.calcolo_codice(person["Cognome"], person["Nome"], day, month, year, person["LuogoNascita"], sex)
+              else:
+                referee_birth_place = " "
+                referee_tax_code = " "
+                    
+              try: referee_residence_address = person["Domicilio"] 
+              except KeyError: referee_residence_address = " "
+                    
+              referee_role = person["Qualifica"]
+              if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
+              if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
+              if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
+              if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
+              days = int(values[f"-DAYS-{person["NumFIS"]}-"])
+              token_value = payments[competition_type][referee_role]["GETTONE"]
+              total_token_value = str(int(days) * int(token_value))
+              if values[f"-EXTRA-{person["NumFIS"]}-"] == True: total_token_value = str(int(total_token_value)+token_value)
 
-            nights = days if travel_distance >= 100 else (days -1) if travel_distance >= 50 else 0
-            night_value = nights * payments[competition_type][referee_role]["PERNOTTO"]
-            total_value = str(float(total_token_value) + float(journey) + float(meals) + float(night_value))
-            
-            FIS_id = person["NumFIS"]
-            datarinnovo = person["DataRinnovo"]
-            year, month, day = datarinnovo.split("-")
-            renewal_date = f'{day}/{month}/{year}'
-            if values[f"-EXTRA-{person["NumFIS"]}-"] == True: days = days + 1
+              travel_distance = math.ceil(journeys[person["Località"].upper()])
+              if travel_distance < 50: journey = math.ceil(gas / 10 * 2 * days * travel_distance)
+              else: journey = math.ceil(gas / 10 * 2 * travel_distance)
+              
+              breakfast_number = (1 * days) if travel_distance > 10 else 0
+              meal_number = (2 * days) if travel_distance < 100 else (2 * days + 1)
+              breakfast_value = payments[competition_type][referee_role]["COLAZIONE"]
+              meal_value = payments[competition_type][referee_role]["PRANZO"]
+              meals = breakfast_number * breakfast_value + meal_number * meal_value
 
-            datadict = {
-              form_fields[0]: referee_name,
-              form_fields[1]: referee_birth_place,
-              form_fields[2]: referee_residence_address,
-              form_fields[3]: referee_tax_code,
-              form_fields[4]: referee_role,
-              form_fields[5]: competition_name,
-              form_fields[6]: convocation,
-              form_fields[7]: competition_place,
-              form_fields[8]: competition_date,
-              form_fields[9]: days,
-              form_fields[10]: token_value,
-              form_fields[11]: total_token_value,
-              form_fields[12]: journey,
-              form_fields[13]: meals,
-              form_fields[14]: night_value,
-              form_fields[15]: total_value,
-              form_fields[16]: place,
-              form_fields[17]: sign_date,
-              form_fields[18]: FIS_id,
-              form_fields[19]: renewal_date,
-            }
+              nights = days if travel_distance >= 100 else (days -1) if travel_distance >= 50 else 0
+              night_value = nights * payments[competition_type][referee_role]["PERNOTTO"]
+              total_value = str(float(total_token_value) + float(journey) + float(meals) + float(night_value))
+              
+              FIS_id = person["NumFIS"]
+              datarinnovo = person["DataRinnovo"]
+              year, month, day = datarinnovo.split("-")
+              renewal_date = f'{day}/{month}/{year}'
+              if values[f"-EXTRA-{person["NumFIS"]}-"] == True: days = days + 1
 
-            fillpdfs.write_fillable_pdf('data/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
-            window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
+              datadict = {
+                form_fields[0]: referee_name,
+                form_fields[1]: referee_birth_place,
+                form_fields[2]: referee_residence_address,
+                form_fields[3]: referee_tax_code,
+                form_fields[4]: referee_role,
+                form_fields[5]: competition_name,
+                form_fields[6]: convocation,
+                form_fields[7]: competition_place,
+                form_fields[8]: competition_date,
+                form_fields[9]: days,
+                form_fields[10]: token_value,
+                form_fields[11]: total_token_value,
+                form_fields[12]: journey,
+                form_fields[13]: meals,
+                form_fields[14]: night_value,
+                form_fields[15]: total_value,
+                form_fields[16]: place,
+                form_fields[17]: sign_date,
+                form_fields[18]: FIS_id,
+                form_fields[19]: renewal_date,
+              }
 
-        except Exception as e:
-          window["-OUTPUT-TERMINAL-"].update(f"La creazione di {referee_name} ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
+              fillpdfs.write_fillable_pdf('data/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
+              window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
 
-      fill_summoning_xlsx(window, values["-CONVOCATION-DAY-"], values["-CONVOCATION-MONTH-"], values["-CONVOCATION-YEAR-"],
-                          values["-COMPETITION-NAME-"], values["-COMPETITION-DAY-"], values["-COMPETITION-MONTH-"], values["-COMPETITION-YEAR-"],
-                          values["-COMPETITION-PLACE-"], precomp_tech, directors, comp_techs, referees, current_dir)
+          except Exception as e:
+            window["-OUTPUT-TERMINAL-"].update(f"La creazione di {referee_name} ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
+
+        fill_summoning_xlsx(window, values["-CONVOCATION-DAY-"], values["-CONVOCATION-MONTH-"], values["-CONVOCATION-YEAR-"],
+                            values["-COMPETITION-NAME-"], values["-COMPETITION-DAY-"], values["-COMPETITION-MONTH-"], values["-COMPETITION-YEAR-"],
+                            values["-COMPETITION-PLACE-"], precomp_tech, directors, comp_techs, referees, current_dir)
+        save_config(window, current_dir, dit, values, journeys)
+      else:
+        window["-OUTPUT-TERMINAL-"].update(f"Impossibile esportare, nessuna tratta calcolata\n", text_color_for_value="red", append=True)
+
+    if events == "-SAVE-CONFIG-":
+      try:
+       journeys = journeys
+      except UnboundLocalError:
+        journeys = {}
+      save_config(window, current_dir, dit, values, journeys)
+
+    if events == "-LOAD-CONFIG-":
+      with open(f"{current_dir}/data/rimborsi.save_conf", "r", encoding="utf-8") as f:
+        savefile = json.load(f)
+      
+      window["-COMPETITION-NAME-"].update(savefile["NomeGara"])
+      window["-COMPETITION-TYPE-"].update(savefile["TipoGara"])
+      window["-COMPETITION-PLACE-"].update(savefile["CittàGara"])
+      window["-COMPETITION-ADDRESS-"].update(savefile["IndirizzoGara"])
+      journeys = savefile["Tratte"]
+      
+      day,month,year = savefile["DataGara"].split("-")
+      window["-COMPETITION-DAY-"].update(day)
+      window["-COMPETITION-MONTH-"].update(month)
+      window["-COMPETITION-YEAR-"].update(year)
+      
+      day,month,year = savefile["DataConv"].split("-")
+      window["-CONVOCATION-DAY-"].update(day)
+      window["-CONVOCATION-MONTH-"].update(month)
+      window["-CONVOCATION-YEAR-"].update(year)
+      
+      day,month,year = savefile["DataFirma"].split("-")
+      window["-SIGN-DAY-"].update(day)
+      window["-SIGN-MONTH-"].update(month)
+      window["-SIGN-YEAR-"].update(year)
+      
+      window["-GAS-PRICE-"].update(savefile["CostoBenzina"])
+
+      for numfis, vals in savefile["ArbitriConv"].items():
+        window[f"-SUMMONED-{numfis}-"].update(value=True)
+        window[f"-DAYS-{numfis}-"].update(value=vals["Giorni"])
+        window[f"-EXTRA-{numfis}-"].update(value=vals["Extra"])
 
 if __name__ == "__main__":
   main()
