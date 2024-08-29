@@ -1,4 +1,4 @@
-import datetime as dt, json, math, os, PySimpleGUI as PSG
+import datetime as dt, gc, json, math, os, PySimpleGUI as PSG, pythoncom
 import data.cf as cf
 import urllib.parse
 if os.name == "nt": import win32com.client as win32
@@ -165,7 +165,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
 def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, summon_year:str, competition_name:str,
                         competition_day:str, competition_month:str, competition_year:str, competition_place:str, 
                         precomp_tech:list, directors:list, comp_techs:list, referees:list, current_dir:str) -> None:
-  
+
   try:
 
     window["-OUTPUT-TERMINAL-"].update(f"Creazione di CONVOCAZIONE\n", text_color_for_value="green", append=True)
@@ -213,16 +213,22 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
           break
     
     if os.name == "nt":
-      workbook.save(f"{current_dir}/data/template_convocazione.xlsx")
-      excel = win32.Dispatch('Excel.Application')
-      workbook = excel.Workbooks.Open(f"{current_dir}/data/template_convocazione.xlsx")
-      sheet = workbook.Worksheets(1)
-      sheet.PageSetup.Orientation = 2
-      pdf_path = f"{current_dir}/Export/CONVOCAZIONE.pdf"
-      workbook.ExportAsFixedFormat(0, pdf_path)
-      workbook.Close(False)
-      excel.Quit()
-      window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE completata correttamente\n", text_color_for_value="green", append=True)
+      try:
+        workbook.save(f"{current_dir}/data/template_convocazione.xlsx")
+        excel = win32.Dispatch('Excel.Application')
+        workbook = excel.Workbooks.Open(f"{current_dir}/data/template_convocazione.xlsx")
+        sheet = workbook.Worksheets(1)
+        sheet.PageSetup.Zoom = False
+        sheet.PageSetup.FitToPagesWide = 1
+        sheet.PageSetup.FitToPagesTall = 1
+        pdf_path = f"{current_dir}/Export/CONVOCAZIONE.pdf"
+        workbook.ExportAsFixedFormat(0, pdf_path)
+        workbook.Close(False)
+        window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE completata correttamente\n", text_color_for_value="green", append=True)
+      finally:
+        excel.Quit()
+        pythoncom.CoUninitialize()
+        gc.collect()
     else:
       workbook.save("CONVOCAZIONE.xlsx")
       window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE.xlsx completata correttamente. Procedere all'esportazione in PDF\n", text_color_for_value="yellow", append=True)
@@ -364,7 +370,7 @@ def main():
               referee_role = person["Qualifica"]
               if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
               if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
-              if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
+              if referee_role in ["COMPUTERISTA", "4FENCE"]: comp_techs.append(referee_name)
               if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
               days = int(values[f"-DAYS-{person["NumFIS"]}-"])
               token_value = payments[competition_type][referee_role]["GETTONE"]
@@ -391,6 +397,7 @@ def main():
               renewal_date = f'{day}/{month}/{year}'
               if values[f"-EXTRA-{person["NumFIS"]}-"] == True: days = days + 1
 
+              if referee_role == "4FENCE": referee_role = "COMPUTERISTA"
               datadict = {
                 form_fields[0]: referee_name,
                 form_fields[1]: referee_birth_place,
@@ -442,6 +449,7 @@ def main():
       window["-COMPETITION-TYPE-"].update(savefile["TipoGara"])
       window["-COMPETITION-PLACE-"].update(savefile["CittàGara"])
       window["-COMPETITION-ADDRESS-"].update(savefile["IndirizzoGara"])
+      window["-EXPORT-"].update(disabled=False)
       journeys = savefile["Tratte"]
       
       day,month,year = savefile["DataGara"].split("-")

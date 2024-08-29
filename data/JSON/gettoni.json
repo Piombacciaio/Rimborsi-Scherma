@@ -18,6 +18,15 @@
             "PRECENA": 15.5,
             "PRENOTTE" : 31
         },
+        "4FENCE": {
+            "COLAZIONE": 0,
+            "PRANZO": 0,
+            "CENA": 0,
+            "GETTONE": 40,
+            "PERNOTTO": 0,
+            "PRECENA": 0,
+            "PRENOTTE" : 0
+        },
         "TECNICO ARMI": {
             "COLAZIONE": 2.5,
             "PRANZO": 15.5,
@@ -73,6 +82,15 @@
             "PERNOTTO": 45,
             "PRECENA": 27,
             "PRENOTTE" : 45
+        },
+        "4FENCE": {
+            "COLAZIONE": 0,
+            "PRANZO": 0,
+            "CENA": 0,
+            "GETTONE": 40,
+            "PERNOTTO": 0,
+            "PRECENA": 0,
+            "PRENOTTE" : 0
         },
         "TECNICO ARMI": {
             "COLAZIONE": 2.5,
@@ -130,6 +148,15 @@
             "PERNOTTO": 50,
             "PRECENA": 30,
             "PRENOTTE" : 50
+        },
+        "4FENCE": {
+            "COLAZIONE": 0,
+            "PRANZO": 0,
+            "CENA": 0,
+            "GETTONE": 75,
+            "PERNOTTO": 0,
+            "PRECENA": 0,
+            "PRENOTTE" : 0
         },
         "TECNICO ARMI": {
             "COLAZIONE": 2.5,
