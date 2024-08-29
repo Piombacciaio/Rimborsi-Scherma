@@ -238,8 +238,11 @@ def save_config(window:PSG.Window, current_dir:str, dit:list[dict], values:dict[
       summoned[person["NumFIS"]]["Giorni"] = values[f"-DAYS-{person["NumFIS"]}-"]
       summoned[person["NumFIS"]]["Extra"] = values[f"-EXTRA-{person["NumFIS"]}-"]
   
-  with open(f"{current_dir}/data/rimborsi.save_conf", "r", encoding="utf-8") as f:
-    savefile = json.load(f)
+  try:
+    with open(f"{current_dir}/data/rimborsi.save_conf", "r", encoding="utf-8") as f:
+      savefile = json.load(f)
+  except:
+    savefile = {}
 
   savefile["NomeGara"] = values["-COMPETITION-NAME-"].upper()
   savefile["TipoGara"] = values["-COMPETITION-TYPE-"].upper()
