@@ -80,11 +80,42 @@ def create_dit_tab(dit:list[dict]) -> list:
     PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(15,0))] for person in dit)
   return [
     [PSG.Text("Conv."), PSG.Push(), PSG.Text("Arbitro"), PSG.Push(), PSG.Text("Giorni "), PSG.Text("Extra"), PSG.Text("   ")],
-    [PSG.Column(dit_list, s=(1,300), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")],
+    [PSG.Column(dit_list, s=(1,305), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")],
     [PSG.Text("Pozzo Aggiornato", tooltip=tooltip), 
      PSG.Input("", disabled=True, expand_x=True, key="-UPDATED-REPO-", tooltip=tooltip, enable_events=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white"), 
      PSG.FileBrowse("Apri", file_types=(("FIS_REPO files", "*.fis_repo"),), tooltip=tooltip, button_color="gray")], #note: fis_repo is a normal json with a specific schema, see README.md
      [PSG.Button("Aggiorna Dati", key="-UPDATE-DIT-", button_color="gray", disabled=True, s=(13,1))]
+  ]
+
+def create_edit_tab(dit:list[dict], year) -> list:
+  def empty_line():
+    return PSG.Text("void", text_color="black")
+  
+  combo_text = ([f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}"] for person in dit)
+
+  return [
+    [PSG.Text("Selezione Arbitro"), PSG.Combo(list(combo_text), "Seleziona", key="-EDIT-REF-CHOICE-", enable_events=True, expand_x=True, button_background_color="gray", button_arrow_color="white")],
+    [PSG.Text("Dati generali"), PSG.Line()],
+    [PSG.Text("Nome", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-NAME-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white")],
+    [PSG.Text("Cognome", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-SURNAME-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white")],
+    [PSG.Text("Femmina", s=(15,1)), PSG.Checkbox(text="", key="-EDIT-REFEREE-SEX-", disabled=True)],
+    [PSG.Text("Luogo Residenza", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-RESIDENCE-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white")],
+    [empty_line()],
+    [PSG.Text("Dati anagrafici"), PSG.Line()],
+    [PSG.Text("Luogo Nascita", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-BIRTH-PLACE-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white")],
+    [PSG.Text("Data Nascita", s=(15,1)), 
+     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-EDIT-REFEREE-BIRTH-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-EDIT-REFEREE-BIRTH-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo([x for x in range(year - 80, year)][::-1], "Anno", key="-EDIT-REFEREE-BIRTH-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True)],
+    [empty_line()],
+    [PSG.Text("Dati Federazione"), PSG.Line()],
+    [PSG.Text("Numero FIS", s=(15,1)), PSG.Text("", key="-EDIT-REFEREE-FIS-ID-", p=(10,0))],
+    [PSG.Text("Data Rinnovo", s=(15,1)), 
+     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-EDIT-REFEREE-RENEWAL-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-EDIT-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-EDIT-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True)],
+    [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "", key="-EDIT-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0), disabled=True),
+     PSG.Push(), PSG.Button("Salva Modifiche", key="-EDIT-REF-SAVE-", button_color="gray", disabled=True)]
   ]
 
 def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.TabGroup]]:
@@ -144,16 +175,18 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     [PSG.Text("Data Rinnovo", s=(15,1)), 
      PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-RENEWAL-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
      PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
-     PSG.Combo([x for x in range(year - 80, year)][::-1], "Anno", key="-NEW-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
-    [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "DIRETTORE TORNEO"], "Qualifica", key="-NEW-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
+     PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-NEW-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
+    [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "Qualifica", key="-NEW-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
     [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray")]
     ]
+  edit_tab = create_edit_tab(dit, year)
   default_view = [
     [PSG.TabGroup(
         [
           [PSG.Tab("Home", home_tab)],
           [PSG.Tab("Lista Arbitri", dit_tab)],
-          [PSG.Tab("Nuovo Arbitro", new_dit_tab)]
+          [PSG.Tab("Nuovo Arbitro", new_dit_tab)],
+          [PSG.Tab("Modifica Arbitro", edit_tab)]
         ]
       )
     ],
@@ -183,7 +216,7 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
     sheet = workbook["template"]
 
     sheet["F11"] = summon_cell
-    sheet["B13"] = competition_name.capitalize()
+    sheet["B13"] = competition_name.title()
     sheet["B13"].font = Font(bold=True)
     sheet["B14"] = competition_cell
     sheet["C19"] = precomp_cell
@@ -253,7 +286,7 @@ def save_config(window:PSG.Window, current_dir:str, dit:list[dict], values:dict[
   savefile["NomeGara"] = values["-COMPETITION-NAME-"].upper()
   savefile["TipoGara"] = values["-COMPETITION-TYPE-"].upper()
   savefile["CittàGara"] = values["-COMPETITION-PLACE-"].upper()
-  savefile["IndirizzoGara"] = values["-COMPETITION-ADDRESS-"].capitalize()
+  savefile["IndirizzoGara"] = values["-COMPETITION-ADDRESS-"].title()
   savefile["Tratte"] = journeys
   savefile["DataGara"] = f"{values["-COMPETITION-DAY-"]}-{values["-COMPETITION-MONTH-"]}-{values["-COMPETITION-YEAR-"]}"
   savefile["DataConv"] = f"{values["-CONVOCATION-DAY-"]}-{values["-CONVOCATION-MONTH-"]}-{values["-CONVOCATION-YEAR-"]}"
@@ -331,7 +364,46 @@ def main():
         with open(f"{current_dir}/data/JSON/città.json", "w", encoding="utf-8") as f:
           json.dump(origins, f, indent=4, ensure_ascii=False)
       window.close()
-      window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True) #Re-create window to update referees tab 
+      window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea".title(), create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)#Re-create window to update referees tab 
+      window["-OUTPUT-TERMINAL-"].update(f"Nuovo arbitro aggiunto correttamente\n", text_color_for_value="green", append=True)
+
+    if events == "-EDIT-REF-SAVE-":
+      FIS_id, _ = str(values["-EDIT-REF-CHOICE-"][0]).split(" - ")
+      old_ref = next(filter(lambda ref: ref['NumFIS'] == FIS_id, dit), None)
+      old_ref["Nome"] = values["-EDIT-REFEREE-NAME-"].upper()
+      old_ref["Cognome"] = values["-EDIT-REFEREE-SURNAME-"].upper()
+      old_ref["MaschioFemmina"] = values["-EDIT-REFEREE-SEX-"]
+      old_ref["Località"] = values["-EDIT-REFEREE-RESIDENCE-"].title()
+      old_ref["LuogoNascita"] = values["-EDIT-REFEREE-BIRTH-PLACE-"].upper()
+      old_ref["DataNascita"] = f"{values["-EDIT-REFEREE-BIRTH-YEAR-"]}-{values["-EDIT-REFEREE-BIRTH-MONTH-"]}-{values["-EDIT-REFEREE-BIRTH-DAY-"]}"
+      old_ref["NumFIS"] = values["-EDIT-REFEREE-FIS-ID-"]
+      old_ref["DataRinnovo"] = f"{values["-EDIT-REFEREE-RENEWAL-YEAR-"]}-{values["-EDIT-REFEREE-RENEWAL-MONTH-"]}-{values["-EDIT-REFEREE-RENEWAL-DAY-"]}"
+      old_ref["Qualifica"] = values["-EDIT-REFEREE-ROLE-"].upper()
+      with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
+        json.dump(dit, f, sort_keys=True, indent=4, ensure_ascii=False)
+      window.close()
+      window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)
+      window["-OUTPUT-TERMINAL-"].update(f"Arbitro modificato correttamente\n", text_color_for_value="green", append=True)
+    
+    if events == "-EDIT-REF-CHOICE-":
+      FIS_id, _ = str(values["-EDIT-REF-CHOICE-"][0]).split(" - ")
+      edit_ref_chosen = next(filter(lambda ref: ref['NumFIS'] == FIS_id, dit), None)
+      window["-EDIT-REFEREE-NAME-"].update(edit_ref_chosen["Nome"], disabled=False)
+      window["-EDIT-REFEREE-SURNAME-"].update(edit_ref_chosen["Cognome"], disabled=False)
+      window["-EDIT-REFEREE-SEX-"].update(edit_ref_chosen["MaschioFemmina"], disabled=False)
+      window["-EDIT-REFEREE-RESIDENCE-"].update(edit_ref_chosen["Località"], disabled=False)
+      window["-EDIT-REFEREE-BIRTH-PLACE-"].update(edit_ref_chosen["LuogoNascita"], disabled=False)
+      year,month,day = edit_ref_chosen["DataNascita"].split("-")
+      window["-EDIT-REFEREE-BIRTH-DAY-"].update(day, disabled=False)
+      window["-EDIT-REFEREE-BIRTH-MONTH-"].update(month, disabled=False)
+      window["-EDIT-REFEREE-BIRTH-YEAR-"].update(year, disabled=False)
+      window["-EDIT-REFEREE-FIS-ID-"].update(edit_ref_chosen["NumFIS"])
+      year,month,day = edit_ref_chosen["DataRinnovo"].split("-")
+      window["-EDIT-REFEREE-RENEWAL-DAY-"].update(day, disabled=False)
+      window["-EDIT-REFEREE-RENEWAL-MONTH-"].update(month, disabled=False)
+      window["-EDIT-REFEREE-RENEWAL-YEAR-"].update(year, disabled=False)
+      window["-EDIT-REFEREE-ROLE-"].update(edit_ref_chosen["Qualifica"], disabled=False)
+      window["-EDIT-REF-SAVE-"].update(disabled=False)
 
     if events == "-EXPORT-":
       if journeys != {}:
