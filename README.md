@@ -4,6 +4,10 @@ This script helps me automate some of the most tedious work as a computer techni
 
 For privacy reasons some files are missing (e.g. `data/JSON/dt.json` and `data/template.pdf`)
 
+The keys for `data/template.pdf` are saved in `data/keys` so they shoud give an idea of what the document is like
+
+## Schemas
+
 The schema for `data/JSON/dt.json` is a list of dictionaries:
 
 ```jsonc
@@ -25,9 +29,31 @@ The schema for `data/JSON/dt.json` is a list of dictionaries:
 
 Values for `LuogoNascita` and `Domicilio` are sometimes null as they are not mandatory to comunicate
 
-The keys for `data/template.pdf` are saved in `data/keys` so they shoud give an idea of what the document is like
+The extensions `*.save_conf` and `*.fis_repo` are json like files with a specific schema
 
-Disclaimer: data scraping such as the one used for maps distances is against the TOS, I therefore remove myself from any responsibility of misuse
+The schema for `*.save_conf` files is:
+
+```jsonc
+{
+    "NomeGara": "NameOfCompetition",
+    "TipoGara": "TypeOfCompetition", //REG, INTERREG, NAZ
+    "CittàGara": "PlaceOfCompetition",
+    "IndirizzoGara": "AddressOfCompetition",
+    "Tratte": {
+        "CityOfOrigin": 999
+    },
+    "DataGara": "DD-MM-YYYY",
+    "DataConv": "DD-MM-YYYY",
+    "DataFirma": "DD-MM-YYYY",
+    "CostoBenzina": "1.95",
+    "ArbitriConv": {
+        "xxxxxx": { //FIS Id of summoned Referees
+            "Giorni": 2,
+            "Extra": false
+        } 
+    }
+}
+```
 
 The schema for `*.fis_repo` files is:
 
@@ -58,6 +84,8 @@ The schema for `*.fis_repo` files is:
     ]
 }
 ```
+
+Disclaimer: data scraping such as the one used for maps distances is against the TOS, I therefore remove myself from any responsibility of misuse
 
 ## Requirements
 
