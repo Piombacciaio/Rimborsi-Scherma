@@ -91,10 +91,11 @@ def create_edit_tab(dit:list[dict], year) -> list:
   def empty_line():
     return PSG.Text("void", text_color="black")
   
-  combo_text = ([f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}"] for person in dit)
+  combo_text = list(f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}" for person in dit)
 
   return [
-    [PSG.Text("Selezione Arbitro"), PSG.Combo(list(combo_text), "Seleziona", key="-EDIT-REF-CHOICE-", enable_events=True, expand_x=True, button_background_color="gray", button_arrow_color="white")],
+    [PSG.Text("Selezione Arbitro"), PSG.Combo(combo_text, "Seleziona", key="-EDIT-REFEREE-CHOICE-", enable_events=True, expand_x=True, button_background_color="gray", button_arrow_color="white"),
+     PSG.Button("Elimina Arbitro", key="-EDIT-REFEREE-DEL-", button_color="gray", disabled=True)],
     [PSG.Text("Dati generali"), PSG.Line()],
     [PSG.Text("Nome", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-NAME-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white")],
     [PSG.Text("Cognome", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-SURNAME-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="gray", disabled_readonly_text_color="white")],
@@ -115,7 +116,7 @@ def create_edit_tab(dit:list[dict], year) -> list:
      PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-EDIT-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-EDIT-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True)],
     [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "", key="-EDIT-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0), disabled=True),
-     PSG.Push(), PSG.Button("Salva Modifiche", key="-EDIT-REF-SAVE-", button_color="gray", disabled=True)]
+     PSG.Push(), PSG.Button("Salva Modifiche", key="-EDIT-REFEREE-SAVE-", button_color="gray", disabled=True)]
   ]
 
 def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.TabGroup]]:
@@ -358,8 +359,8 @@ def main():
       dit = sorted(dit, key=lambda d: d['Cognome'])
       with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
         json.dump(dit, f, sort_keys=True, indent=4, ensure_ascii=False)
-      if new_referee["LuogoNascita"] not in origins and new_referee["LuogoNascita"] != None:
-        origins.append(new_referee["LuogoNascita"])
+      if new_referee["Località"] not in origins and new_referee["Località"] != None:
+        origins.append(new_referee["Località"].title())
         origins.sort()
         with open(f"{current_dir}/data/JSON/città.json", "w", encoding="utf-8") as f:
           json.dump(origins, f, indent=4, ensure_ascii=False)
@@ -367,8 +368,8 @@ def main():
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea".title(), create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)#Re-create window to update referees tab 
       window["-OUTPUT-TERMINAL-"].update(f"Nuovo arbitro aggiunto correttamente\n", text_color_for_value="green", append=True)
 
-    if events == "-EDIT-REF-SAVE-":
-      FIS_id, _ = str(values["-EDIT-REF-CHOICE-"][0]).split(" - ")
+    if events == "-EDIT-REFEREE-SAVE-":
+      FIS_id, _ = str(values["-EDIT-REFEREE-CHOICE-"]).split(" - ")
       old_ref = next(filter(lambda ref: ref['NumFIS'] == FIS_id, dit), None)
       old_ref["Nome"] = values["-EDIT-REFEREE-NAME-"].upper()
       old_ref["Cognome"] = values["-EDIT-REFEREE-SURNAME-"].upper()
@@ -376,7 +377,6 @@ def main():
       old_ref["Località"] = values["-EDIT-REFEREE-RESIDENCE-"].title()
       old_ref["LuogoNascita"] = values["-EDIT-REFEREE-BIRTH-PLACE-"].upper()
       old_ref["DataNascita"] = f"{values["-EDIT-REFEREE-BIRTH-YEAR-"]}-{values["-EDIT-REFEREE-BIRTH-MONTH-"]}-{values["-EDIT-REFEREE-BIRTH-DAY-"]}"
-      old_ref["NumFIS"] = values["-EDIT-REFEREE-FIS-ID-"]
       old_ref["DataRinnovo"] = f"{values["-EDIT-REFEREE-RENEWAL-YEAR-"]}-{values["-EDIT-REFEREE-RENEWAL-MONTH-"]}-{values["-EDIT-REFEREE-RENEWAL-DAY-"]}"
       old_ref["Qualifica"] = values["-EDIT-REFEREE-ROLE-"].upper()
       with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
@@ -384,10 +384,21 @@ def main():
       window.close()
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)
       window["-OUTPUT-TERMINAL-"].update(f"Arbitro modificato correttamente\n", text_color_for_value="green", append=True)
-    
-    if events == "-EDIT-REF-CHOICE-":
-      FIS_id, _ = str(values["-EDIT-REF-CHOICE-"][0]).split(" - ")
+
+    if events == "-EDIT-REFEREE-DEL-":
+      FIS_id, _ = str(values["-EDIT-REFEREE-CHOICE-"]).split(" - ")
       edit_ref_chosen = next(filter(lambda ref: ref['NumFIS'] == FIS_id, dit), None)
+      dit.remove(edit_ref_chosen)
+      with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
+        json.dump(dit, f, sort_keys=True, indent=4, ensure_ascii=False)
+      window.close()
+      window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)
+      window["-OUTPUT-TERMINAL-"].update(f"Arbitro eliminato correttamente\n", text_color_for_value="green", append=True)
+
+    if events == "-EDIT-REFEREE-CHOICE-":
+      FIS_id, _ = str(values["-EDIT-REFEREE-CHOICE-"]).split(" - ")
+      edit_ref_chosen = next(filter(lambda ref: ref['NumFIS'] == FIS_id, dit), None)
+      window["-EDIT-REFEREE-DEL-"].update(disabled=False)
       window["-EDIT-REFEREE-NAME-"].update(edit_ref_chosen["Nome"], disabled=False)
       window["-EDIT-REFEREE-SURNAME-"].update(edit_ref_chosen["Cognome"], disabled=False)
       window["-EDIT-REFEREE-SEX-"].update(edit_ref_chosen["MaschioFemmina"], disabled=False)
@@ -403,7 +414,7 @@ def main():
       window["-EDIT-REFEREE-RENEWAL-MONTH-"].update(month, disabled=False)
       window["-EDIT-REFEREE-RENEWAL-YEAR-"].update(year, disabled=False)
       window["-EDIT-REFEREE-ROLE-"].update(edit_ref_chosen["Qualifica"], disabled=False)
-      window["-EDIT-REF-SAVE-"].update(disabled=False)
+      window["-EDIT-REFEREE-SAVE-"].update(disabled=False)
 
     if events == "-EXPORT-":
       if journeys != {}:

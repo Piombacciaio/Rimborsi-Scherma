@@ -9,4 +9,5 @@ TODO*
 *.png
 *.ico
 *.fis_repo
+*.backup
 data/rimborsi.save_conf

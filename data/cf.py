@@ -208,7 +208,10 @@ def calcolo_codice(cognome:str, nome:str, giorno:str, mese:str, anno:str, luogo:
 
   cod_cognome = calculate_surname_chars(cognome)
   cod_nome = calculate_name_chars(nome)
-  municipalità:str = CODES[luogo]["codice_catastale"]
+  try:
+    municipalità:str = CODES[luogo]["codice_catastale"]
+  except KeyError:
+    return " "
   cod_anno = anno[2:]
   cod_mese = BIRTH_MONTH[mese]
   if mf == True:
