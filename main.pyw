@@ -126,26 +126,26 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
   
   new_dit_tab = [
     [PSG.Text("Dati generali"), PSG.Line()],
-    [PSG.Text("Nome", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-NAME-", s=(50,1), p=(10,0))],
-    [PSG.Text("Cognome", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-SURNAME-", s=(50,1), p=(10,0))],
+    [PSG.Text("Nome", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-NAME-", enable_events=True, s=(50,1), p=(10,0))],
+    [PSG.Text("Cognome", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-SURNAME-", enable_events=True, s=(50,1), p=(10,0))],
     [PSG.Text("Femmina", s=(15,1)), PSG.Checkbox(text="", key="-NEW-REFEREE-SEX-")],
-    [PSG.Text("Luogo Residenza", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-RESIDENCE-", s=(50,1), p=(10,0))],
+    [PSG.Text("Luogo Residenza", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-RESIDENCE-", enable_events=True, s=(50,1), p=(10,0))],
     [empty_line()],
     [PSG.Text("Dati anagrafici"), PSG.Line()],
     [PSG.Text("Luogo Nascita", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-BIRTH-PLACE-", s=(50,1), p=(10,0))],
     [PSG.Text("Data Nascita", s=(15,1)), 
-     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-BIRTH-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
-     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-BIRTH-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
-     PSG.Combo([x for x in range(year - 80, year)][::-1], "Anno", key="-NEW-REFEREE-BIRTH-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
+     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-BIRTH-DAY-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-BIRTH-MONTH-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo([x for x in range(year - 80, year)][::-1], "Anno", key="-NEW-REFEREE-BIRTH-YEAR-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
     [empty_line()],
     [PSG.Text("Dati Federazione"), PSG.Line()],
-    [PSG.Text("Numero FIS", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-FIS-ID-", s=(50,1), p=(10,0))],
+    [PSG.Text("Numero FIS", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-FIS-ID-", enable_events=True, s=(50,1), p=(10,0))],
     [PSG.Text("Data Rinnovo", s=(15,1)), 
-     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-RENEWAL-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
-     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
-     PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-NEW-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
-    [PSG.Text("", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "Qualifica", key="-NEW-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
-    [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray")]
+     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-RENEWAL-DAY-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-RENEWAL-MONTH-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-NEW-REFEREE-RENEWAL-YEAR-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
+    [PSG.Text("", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "Qualifica", key="-NEW-REFEREE-ROLE-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
+    [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray", disabled=True)]
     ]
   
   combo_edit_text = list(f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}" for person in dit)
@@ -337,7 +337,17 @@ def main():
           person["DataRinnovo"] = updated["DataRinnovo"]
       with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
         json.dump(dit, f, sort_keys=True, indent=4, ensure_ascii=False)
-  
+
+    if events in ["-NEW-REFEREE-NAME-", "-NEW-REFEREE-SURNAME-", "-NEW-REFEREE-NAME-", "-NEW-REFEREE-FIS-ID-", "-NEW-REFEREE-RENEWAL-DAY-", "-NEW-REFEREE-RENEWAL-MONTH-", 
+                  "-NEW-REFEREE-RENEWAL-YEAR-", "-NEW-REFEREE-ROLE-", "-NEW-REFEREE-BIRTH-DAY-", "-NEW-REFEREE-BIRTH-MONTH-", "-NEW-REFEREE-BIRTH-YEAR-"]:
+      disabled_check = not (values["-NEW-REFEREE-NAME-"] and values["-NEW-REFEREE-SURNAME-"] and 
+                            values["-NEW-REFEREE-NAME-"] and values["-NEW-REFEREE-FIS-ID-"] and 
+                            values["-NEW-REFEREE-RENEWAL-DAY-"] and values["-NEW-REFEREE-RENEWAL-MONTH-"] and 
+                            values["-NEW-REFEREE-RENEWAL-YEAR-"] and values["-NEW-REFEREE-ROLE-"] and
+                            values["-NEW-REFEREE-BIRTH-DAY-"] and values["-NEW-REFEREE-BIRTH-MONTH-"] and 
+                            values["-NEW-REFEREE-BIRTH-DAY-"])
+      window["-ADD-NEW-REFEREE-"].update(disabled=disabled_check)
+
     if events == "-ADD-NEW-REFEREE-":
       new_referee = {}
       new_referee["Cognome"] = values["-NEW-REFEREE-SURNAME-"].upper().strip()
