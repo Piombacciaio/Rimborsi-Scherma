@@ -1,4 +1,4 @@
-import datetime as dt, gc, json, math, os, PySimpleGUI as PSG, pythoncom
+import calendar, datetime as dt, json, math, os, PySimpleGUI as PSG
 import data.cf as cf
 import urllib.parse
 if os.name == "nt": import win32com.client as win32
@@ -76,31 +76,29 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
   def empty_line():
     return PSG.Text("void", text_color="black")
 
-  year_list = [x for x in range(year - 1, year + 2)][::-1]
-
   home_tab = [
     [PSG.Text("Nome Gara", s=(11,1)), PSG.Input("Nome in locandina", key="-COMPETITION-NAME-", s=(55,1))], 
     [PSG.Text("Tipo Gara", s=(11,1)), PSG.Combo(["REG", "INTREG", "NAZ"], "Tipo", s=(8,1), key="-COMPETITION-TYPE-", button_background_color="gray", button_arrow_color="white", enable_events=True)],
     [PSG.Text("Città Gara", s=(11,1)), PSG.Input("Città", key="-COMPETITION-PLACE-", s=(55,1))], 
     [PSG.Text("Indirizzo Gara", s=(11,1)), PSG.Input("Via", key="-COMPETITION-ADDRESS-", s=(41,1)), PSG.Button("Calcola Tratte", key="-LOAD-ROUTES-", button_color="gray", pad=(6,0))], 
     [PSG.Text("Data Gara", s=(11,1)), 
-    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="Giorno", key="-COMPETITION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d.%02d" % (x, x + 1) for x in range(1, 31)], default_value="%02d.%02d" % (day, day + 1), key="-COMPETITION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="Mese", key="-COMPETITION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % month, key="-COMPETITION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(year_list, default_value="Anno", key="-COMPETITION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, key="-COMPETITION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Convocazione", s=(11,1)), 
-    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="Giorno", key="-CONVOCATION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value= "%02d" % (day - 8 if day - 8 > 0 else (calendar.monthrange(year, (month - 1 if month - 1 > 0 else 12))[1] + day - 8)), key="-CONVOCATION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="Mese", key="-CONVOCATION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % (month if day - 8 > 0 else (month - 1 if month - 1 > 0 else 12)), key="-CONVOCATION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(year_list, default_value="Anno", key="-CONVOCATION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value= (year if day - 8 > 0 and month - 1 > 0 else year - 1) , key="-CONVOCATION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Data firma", s=(11,1)), 
     PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="%02d" % day, key="-SIGN-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
     PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % month, key="-SIGN-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(year_list, default_value=year, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", key="-GAS-PRICE-", s=(5,1)), PSG.Text("€/L")],
     [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Push(), PSG.Button("Ricarica Config", key="-RLD-CFG-", button_color="gray")],
     [PSG.Text("Output"), PSG.Line()],
@@ -112,14 +110,14 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
   tooltip_dit = "Pozzo aggiornato con le nuove date di rinnovo del tesseramento"
   dit_list = ([
     PSG.Checkbox(text="", key=f"-SUMMONED-{person["NumFIS"]}-", s=(1,1)), 
-    PSG.Text(f"{person["Cognome"]} {person["Nome"]}",s=(40,1)),
+    PSG.Text(f"{person["Cognome"]} {person["Nome"]}",s=(40,1), enable_events=True, key=f"-NAME-{person["NumFIS"]}-"),
     PSG.Input("", key= f"-DAYS-{person["NumFIS"]}-", s=(5,1)),
-    PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(15,0))] for person in dit)
+    PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(17,0))] for person in dit)
   dit_tab = [
     [PSG.Text("Conv."), PSG.Push(), PSG.Text("Arbitro"), PSG.Push(), PSG.Text("Giorni "), PSG.Text("Extra"), PSG.Text("   ")],
     [PSG.Column(dit_list, s=(1,305), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")],
     [PSG.Text("Pozzo Aggiornato", tooltip=tooltip_dit), 
-     PSG.Input("", disabled=True, expand_x=True, key="-UPDATED-REPO-", tooltip=tooltip_dit, enable_events=True, disabled_readonly_background_color="darkgray", disabled_readonly_text_color="white"), 
+     PSG.Input("", disabled=True, key="-UPDATED-REPO-", tooltip=tooltip_dit, enable_events=True, s=(48,1), disabled_readonly_background_color="black", disabled_readonly_text_color="white"), 
      PSG.FileBrowse("Apri", file_types=(("FIS_REPO files", "*.fis_repo"),), tooltip=tooltip_dit, button_color="gray")], #note: fis_repo is a normal json with a specific schema, see README.md
      [PSG.Button("Aggiorna Dati", key="-UPDATE-DIT-", button_color="gray", disabled=True, s=(13,1))]
   ]
@@ -134,15 +132,15 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     [PSG.Text("Dati anagrafici"), PSG.Line()],
     [PSG.Text("Luogo Nascita", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-BIRTH-PLACE-", s=(50,1), p=(10,0))],
     [PSG.Text("Data Nascita", s=(15,1)), 
-     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-BIRTH-DAY-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
-     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-BIRTH-MONTH-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 32)], "Giorno", key="-NEW-REFEREE-BIRTH-DAY-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)], "Mese", key="-NEW-REFEREE-BIRTH-MONTH-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 80, year)][::-1], "Anno", key="-NEW-REFEREE-BIRTH-YEAR-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
     [empty_line()],
     [PSG.Text("Dati Federazione"), PSG.Line()],
     [PSG.Text("Numero FIS", s=(15,1)), PSG.Input("", key="-NEW-REFEREE-FIS-ID-", enable_events=True, s=(50,1), p=(10,0))],
     [PSG.Text("Data Rinnovo", s=(15,1)), 
-     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-NEW-REFEREE-RENEWAL-DAY-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
-     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-NEW-REFEREE-RENEWAL-MONTH-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 32)], "Giorno", key="-NEW-REFEREE-RENEWAL-DAY-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)], "Mese", key="-NEW-REFEREE-RENEWAL-MONTH-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-NEW-REFEREE-RENEWAL-YEAR-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
     [PSG.Text("", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "Qualifica", key="-NEW-REFEREE-ROLE-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
     [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray", disabled=True)]
@@ -150,7 +148,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
   
   combo_edit_text = list(f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}" for person in dit)
   edit_tab = [
-    [PSG.Text("Selezione Arbitro"), PSG.Combo(combo_edit_text, "Seleziona", key="-EDIT-REFEREE-CHOICE-", enable_events=True, expand_x=True, button_background_color="gray", button_arrow_color="white"),
+    [PSG.Text("Selezione Arbitro"), PSG.Combo(combo_edit_text, "Seleziona", key="-EDIT-REFEREE-CHOICE-", enable_events=True, s=(37,1), button_background_color="gray", button_arrow_color="white"),
      PSG.Button("Elimina Arbitro", key="-EDIT-REFEREE-DEL-", button_color="gray", disabled=True)],
     [PSG.Text("Dati generali"), PSG.Line()],
     [PSG.Text("Nome", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-NAME-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="darkgray", disabled_readonly_text_color="white")],
@@ -161,15 +159,15 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     [PSG.Text("Dati anagrafici"), PSG.Line()],
     [PSG.Text("Luogo Nascita", s=(15,1)), PSG.Input("", key="-EDIT-REFEREE-BIRTH-PLACE-", s=(50,1), p=(10,0), disabled=True, disabled_readonly_background_color="darkgray", disabled_readonly_text_color="white")],
     [PSG.Text("Data Nascita", s=(15,1)), 
-     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-EDIT-REFEREE-BIRTH-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
-     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-EDIT-REFEREE-BIRTH-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 32)], "Giorno", key="-EDIT-REFEREE-BIRTH-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)], "Mese", key="-EDIT-REFEREE-BIRTH-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 80, year)][::-1], "Anno", key="-EDIT-REFEREE-BIRTH-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True)],
     [empty_line()],
     [PSG.Text("Dati Federazione"), PSG.Line()],
     [PSG.Text("Numero FIS", s=(15,1)), PSG.Text("", key="-EDIT-REFEREE-FIS-ID-", p=(10,0))],
     [PSG.Text("Data Rinnovo", s=(15,1)), 
-     PSG.Combo(["%02d" % x for x in range(1, 32)][::-1], "Giorno", key="-EDIT-REFEREE-RENEWAL-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
-     PSG.Combo(["%02d" % x for x in range(1, 13)][::-1], "Mese", key="-EDIT-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 32)], "Giorno", key="-EDIT-REFEREE-RENEWAL-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
+     PSG.Combo(["%02d" % x for x in range(1, 13)], "Mese", key="-EDIT-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-EDIT-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True)],
     [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "", key="-EDIT-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0), disabled=True),
      PSG.Push(), PSG.Button("Salva Modifiche", key="-EDIT-REFEREE-SAVE-", button_color="gray", disabled=True)]
@@ -185,7 +183,8 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
         ]
       )
     ],
-    [PSG.Button("Salva Configurazione", key="-SAVE-CONFIG-", button_color="gray"), PSG.Button("Carica Configurazione", key="-LOAD-CONFIG-", button_color="gray")]
+    [PSG.Button("Salva Configurazione", key="-SAVE-CONFIG-", button_color="gray"), PSG.Button("Carica Configurazione", key="-LOAD-CONFIG-", button_color="gray"),
+     PSG.Checkbox("KeepOnTop", default=True, k="-CHANGE-VISIBILITY-", enable_events=True)]
   ]
 
   return default_view
@@ -250,13 +249,12 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
         sheet.PageSetup.FitToPagesWide = 1
         sheet.PageSetup.FitToPagesTall = 1
         pdf_path = f"{current_dir}/Export/CONVOCAZIONE.pdf"
+        if os.path.exists(pdf_path): os.remove(pdf_path)
         workbook.ExportAsFixedFormat(0, pdf_path)
         workbook.Close(False)
         window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE completata correttamente\n", text_color_for_value="green", append=True)
       finally:
         excel.Quit()
-        pythoncom.CoUninitialize()
-        gc.collect()
     else:
       workbook.save("CONVOCAZIONE.xlsx")
       window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE.xlsx completata correttamente. Procedere all'esportazione in PDF\n", text_color_for_value="yellow", append=True)
@@ -307,6 +305,7 @@ def main():
   origins:list[str]
   payments:dict[dict]
   dit, origins, payments, form_fields = load_data(current_dir)
+  journeys = {}
 
   default_view = create_view(current_year, current_month, current_day, dit)
 
@@ -323,7 +322,8 @@ def main():
     #if events == "-DEBUG-": print("Hi!") #Left this here even if not needed 'cause my best friend (she made this) was extremely proud of her work
     if events == "-RLD-CFG-": dit, origins, payments, form_fields = load_data(current_dir, window)
     if events == "-UPDATED-REPO-": window["-UPDATE-DIT-"].update(disabled=False)
-    
+    if events == "-CHANGE-VISIBILITY-": window.keep_on_top_clear() if not values["-CHANGE-VISIBILITY-"] else window.keep_on_top_set()
+
     if events == "-LOAD-ROUTES-": 
       journeys = {}
       Thread(target=get_distance, args=[origins, values["-COMPETITION-ADDRESS-"], window, journeys]).start() #Moved get_distance to a separate Thread to avoid freezing the window
@@ -337,6 +337,7 @@ def main():
           person["DataRinnovo"] = updated["DataRinnovo"]
       with open(f"{current_dir}/data/JSON/dt.json", "w", encoding="utf-8") as f:
         json.dump(dit, f, sort_keys=True, indent=4, ensure_ascii=False)
+      window["-OUTPUT-TERMINAL-"].update(f"Aggiornamento dati arbitri completato correttamente\n", text_color_for_value="green", append=True)
 
     if events in ["-NEW-REFEREE-NAME-", "-NEW-REFEREE-SURNAME-", "-NEW-REFEREE-NAME-", "-NEW-REFEREE-FIS-ID-", "-NEW-REFEREE-RENEWAL-DAY-", "-NEW-REFEREE-RENEWAL-MONTH-", 
                   "-NEW-REFEREE-RENEWAL-YEAR-", "-NEW-REFEREE-ROLE-", "-NEW-REFEREE-BIRTH-DAY-", "-NEW-REFEREE-BIRTH-MONTH-", "-NEW-REFEREE-BIRTH-YEAR-"]:
@@ -424,104 +425,110 @@ def main():
       window["-EDIT-REFEREE-ROLE-"].update(edit_ref_chosen["Qualifica"], disabled=False)
       window["-EDIT-REFEREE-SAVE-"].update(disabled=False)
 
+    if events.startswith("-NAME-"):
+      summon = events.replace("-NAME-", "-SUMMONED-")
+      window[summon].update(not values[summon])
+
     if events == "-EXPORT-":
       if journeys != {}:
+        if len(journeys) == len(origins):
+          comp_techs = []
+          precomp_tech = []
+          directors = []
+          referees = []
 
-        comp_techs = []
-        precomp_tech = []
-        directors = []
-        referees = []
+          gas = float(values["-GAS-PRICE-"].replace(",", "."))
+          competition_name = values["-COMPETITION-NAME-"].upper()
+          competition_type = values["-COMPETITION-TYPE-"].upper()
+          competition_date = f"{values["-COMPETITION-DAY-"]}/{values["-COMPETITION-MONTH-"]}/{values["-COMPETITION-YEAR-"]}"
+          convocation = f"{values["-CONVOCATION-DAY-"]}/{values["-CONVOCATION-MONTH-"]}/{values["-CONVOCATION-YEAR-"]}"
+          competition_place = place = str(values["-COMPETITION-PLACE-"]).upper()
+          sign_date = f"{values["-SIGN-DAY-"]}/{values["-SIGN-MONTH-"]}/{values["-SIGN-YEAR-"]}"
+          for person in dit:
+            try:
+              if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
+                referee_name = person["Cognome"] + ' ' + person["Nome"]
+                window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name}\n", text_color_for_value="green", append=True)
+                referee_birthday = person["DataNascita"]
+                year, month, day = referee_birthday.split("-")
+                referee_birthday = f'{day}/{month}/{year}'
+                sex = person["MaschioFemmina"]
+                if person["LuogoNascita"] != None:
+                  referee_birth_place = person["LuogoNascita"] + ', ' + referee_birthday
+                  referee_tax_code = cf.calcolo_codice(person["Cognome"], person["Nome"], day, month, year, person["LuogoNascita"], sex)
+                else:
+                  referee_birth_place = " "
+                  referee_tax_code = " "
+                      
+                try: referee_residence_address = person["Domicilio"] 
+                except KeyError: referee_residence_address = " "
+                      
+                referee_role = person["Qualifica"]
+                if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
+                if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
+                if referee_role in ["COMPUTERISTA", "4FENCE"]: comp_techs.append(referee_name)
+                if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
+                days = int(values[f"-DAYS-{person["NumFIS"]}-"])
+                token_value = payments[competition_type][referee_role]["GETTONE"]
+                total_token_value = str(int(days) * int(token_value))
+                if values[f"-EXTRA-{person["NumFIS"]}-"] == True: total_token_value = str(int(total_token_value)+token_value)
 
-        gas = float(values["-GAS-PRICE-"].replace(",", "."))
-        competition_name = values["-COMPETITION-NAME-"].upper()
-        competition_type = values["-COMPETITION-TYPE-"].upper()
-        competition_date = f"{values["-COMPETITION-DAY-"]}/{values["-COMPETITION-MONTH-"]}/{values["-COMPETITION-YEAR-"]}"
-        convocation = f"{values["-CONVOCATION-DAY-"]}/{values["-CONVOCATION-MONTH-"]}/{values["-CONVOCATION-YEAR-"]}"
-        competition_place = place = str(values["-COMPETITION-PLACE-"]).upper()
-        sign_date = f"{values["-SIGN-DAY-"]}/{values["-SIGN-MONTH-"]}/{values["-SIGN-YEAR-"]}"
-        for person in dit:
-          try:
-            if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
-              referee_name = person["Cognome"] + ' ' + person["Nome"]
-              window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name}\n", text_color_for_value="green", append=True)
-              referee_birthday = person["DataNascita"]
-              year, month, day = referee_birthday.split("-")
-              referee_birthday = f'{day}/{month}/{year}'
-              sex = person["MaschioFemmina"]
-              if person["LuogoNascita"] != None:
-                referee_birth_place = person["LuogoNascita"] + ', ' + referee_birthday
-                referee_tax_code = cf.calcolo_codice(person["Cognome"], person["Nome"], day, month, year, person["LuogoNascita"], sex)
-              else:
-                referee_birth_place = " "
-                referee_tax_code = " "
-                    
-              try: referee_residence_address = person["Domicilio"] 
-              except KeyError: referee_residence_address = " "
-                    
-              referee_role = person["Qualifica"]
-              if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
-              if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
-              if referee_role in ["COMPUTERISTA", "4FENCE"]: comp_techs.append(referee_name)
-              if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
-              days = int(values[f"-DAYS-{person["NumFIS"]}-"])
-              token_value = payments[competition_type][referee_role]["GETTONE"]
-              total_token_value = str(int(days) * int(token_value))
-              if values[f"-EXTRA-{person["NumFIS"]}-"] == True: total_token_value = str(int(total_token_value)+token_value)
+                travel_distance = math.ceil(journeys[person["Località"].upper()])
+                if travel_distance < 50: journey = math.ceil(gas / 10 * 2 * days * travel_distance)
+                else: journey = math.ceil(gas / 10 * 2 * travel_distance)
+                
+                breakfast_number = (1 * days) if travel_distance > 10 else 0
+                meal_number = (2 * days) if travel_distance < 100 else (2 * days + 1)
+                breakfast_value = payments[competition_type][referee_role]["COLAZIONE"]
+                meal_value = payments[competition_type][referee_role]["PRANZO"]
+                meals = breakfast_number * breakfast_value + meal_number * meal_value
 
-              travel_distance = math.ceil(journeys[person["Località"].upper()])
-              if travel_distance < 50: journey = math.ceil(gas / 10 * 2 * days * travel_distance)
-              else: journey = math.ceil(gas / 10 * 2 * travel_distance)
-              
-              breakfast_number = (1 * days) if travel_distance > 10 else 0
-              meal_number = (2 * days) if travel_distance < 100 else (2 * days + 1)
-              breakfast_value = payments[competition_type][referee_role]["COLAZIONE"]
-              meal_value = payments[competition_type][referee_role]["PRANZO"]
-              meals = breakfast_number * breakfast_value + meal_number * meal_value
+                nights = days if travel_distance >= 100 else (days -1) if travel_distance >= 50 else 0
+                night_value = nights * payments[competition_type][referee_role]["PERNOTTO"]
+                total_value = str(float(total_token_value) + float(journey) + float(meals) + float(night_value))
+                
+                FIS_id = person["NumFIS"]
+                datarinnovo = person["DataRinnovo"]
+                year, month, day = datarinnovo.split("-")
+                renewal_date = f'{day}/{month}/{year}'
+                if values[f"-EXTRA-{person["NumFIS"]}-"] == True: days = days + 1
 
-              nights = days if travel_distance >= 100 else (days -1) if travel_distance >= 50 else 0
-              night_value = nights * payments[competition_type][referee_role]["PERNOTTO"]
-              total_value = str(float(total_token_value) + float(journey) + float(meals) + float(night_value))
-              
-              FIS_id = person["NumFIS"]
-              datarinnovo = person["DataRinnovo"]
-              year, month, day = datarinnovo.split("-")
-              renewal_date = f'{day}/{month}/{year}'
-              if values[f"-EXTRA-{person["NumFIS"]}-"] == True: days = days + 1
+                if referee_role == "4FENCE": referee_role = "COMPUTERISTA"
+                datadict = {
+                  form_fields[0]: referee_name,
+                  form_fields[1]: referee_birth_place,
+                  form_fields[2]: referee_residence_address,
+                  form_fields[3]: referee_tax_code,
+                  form_fields[4]: referee_role,
+                  form_fields[5]: competition_name,
+                  form_fields[6]: convocation,
+                  form_fields[7]: competition_place,
+                  form_fields[8]: competition_date,
+                  form_fields[9]: days,
+                  form_fields[10]: token_value,
+                  form_fields[11]: total_token_value,
+                  form_fields[12]: journey,
+                  form_fields[13]: meals,
+                  form_fields[14]: night_value,
+                  form_fields[15]: total_value,
+                  form_fields[16]: place,
+                  form_fields[17]: sign_date,
+                  form_fields[18]: FIS_id,
+                  form_fields[19]: renewal_date,
+                }
 
-              if referee_role == "4FENCE": referee_role = "COMPUTERISTA"
-              datadict = {
-                form_fields[0]: referee_name,
-                form_fields[1]: referee_birth_place,
-                form_fields[2]: referee_residence_address,
-                form_fields[3]: referee_tax_code,
-                form_fields[4]: referee_role,
-                form_fields[5]: competition_name,
-                form_fields[6]: convocation,
-                form_fields[7]: competition_place,
-                form_fields[8]: competition_date,
-                form_fields[9]: days,
-                form_fields[10]: token_value,
-                form_fields[11]: total_token_value,
-                form_fields[12]: journey,
-                form_fields[13]: meals,
-                form_fields[14]: night_value,
-                form_fields[15]: total_value,
-                form_fields[16]: place,
-                form_fields[17]: sign_date,
-                form_fields[18]: FIS_id,
-                form_fields[19]: renewal_date,
-              }
+                fillpdfs.write_fillable_pdf('data/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
+                window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
 
-              fillpdfs.write_fillable_pdf('data/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
-              window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
+            except Exception as e:
+              window["-OUTPUT-TERMINAL-"].update(f"La creazione di {referee_name} ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
 
-          except Exception as e:
-            window["-OUTPUT-TERMINAL-"].update(f"La creazione di {referee_name} ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
-
-        fill_summoning_xlsx(window, values["-CONVOCATION-DAY-"], values["-CONVOCATION-MONTH-"], values["-CONVOCATION-YEAR-"],
-                            values["-COMPETITION-NAME-"], values["-COMPETITION-DAY-"], values["-COMPETITION-MONTH-"], values["-COMPETITION-YEAR-"],
-                            values["-COMPETITION-PLACE-"], precomp_tech, directors, comp_techs, referees, current_dir)
-        save_config(window, current_dir, dit, values, journeys)
+          fill_summoning_xlsx(window, values["-CONVOCATION-DAY-"], values["-CONVOCATION-MONTH-"], values["-CONVOCATION-YEAR-"],
+                              values["-COMPETITION-NAME-"], values["-COMPETITION-DAY-"], values["-COMPETITION-MONTH-"], values["-COMPETITION-YEAR-"],
+                              values["-COMPETITION-PLACE-"], precomp_tech, directors, comp_techs, referees, current_dir)
+          save_config(window, current_dir, dit, values, journeys)
+        else:
+         window["-OUTPUT-TERMINAL-"].update(f"Impossibile esportare, attendere la fine del calcolo tratte\n", text_color_for_value="yellow", append=True)
       else:
         window["-OUTPUT-TERMINAL-"].update(f"Impossibile esportare, nessuna tratta calcolata\n", text_color_for_value="red", append=True)
 
