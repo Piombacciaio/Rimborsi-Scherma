@@ -1,4 +1,4 @@
-import calendar, datetime as dt, json, math, os, PySimpleGUI as PSG
+import calendar, datetime as dt, json, math, os, platform, PySimpleGUI as PSG, subprocess
 import data.cf as cf
 import urllib.parse
 if os.name == "nt": import win32com.client as win32
@@ -63,13 +63,13 @@ def get_distance(origins: list[str]|str, destination:str, window:PSG.Window, jou
 
 def load_data(directory:str) -> tuple[list[dict], list[str], dict[str, dict], list]:
   """Load data for referees, origins, payments and pdf template"""
-  with open(f"{directory}/data/JSON/gsa.dt", "r", encoding="utf-8") as f:
+  with open(f"{directory}/data/json/gsa.dt", "r", encoding="utf-8") as f:
     gsa = json.load(f)
     dit = gsa["Arbitri"]
     origins = gsa["Città_Origine"]
-  with open(f"{directory}/data/JSON/gettoni.json", "r") as f:
+  with open(f"{directory}/data/json/gettoni.json", "r") as f:
     payments = json.load(f)
-  form_fields = list(fillpdfs.get_form_fields(f"{directory}/data/template_rimborso.pdf").keys())
+  form_fields = list(fillpdfs.get_form_fields(f"{directory}/data/templates/template_rimborso.pdf").keys())
   return dit, origins, payments, form_fields
 
 def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.TabGroup]]:
@@ -101,7 +101,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     PSG.Text("/"),
     PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", key="-GAS-PRICE-", s=(5,1)), PSG.Text("€/L")],
-    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Push(), PSG.Button("Ricarica Config", key="-RLD-CFG-", button_color="gray")],
+    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Vedi Export", key="-VIEW-EXPORT", button_color="gray"), PSG.Push(), PSG.Button("Ricarica Config", key="-RLD-CFG-", button_color="gray")],
     [PSG.VPush()],
     [PSG.Text("Output"), PSG.Line()],
     [PSG.Multiline(disabled=True, autoscroll=True, expand_x=True, auto_refresh=True, s=(1, 6), key="-OUTPUT-TERMINAL-", sbar_arrow_color="white", sbar_background_color="grey")],
@@ -212,7 +212,7 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
     directors_cell = "; ".join(directors)
     comp_techs_cell = "; ".join(comp_techs)
 
-    workbook = load_workbook(f"{current_dir}/data/template_convocazione.xlsx")
+    workbook = load_workbook(f"{current_dir}/data/templates/template_convocazione.xlsx")
     sheet = workbook["template"]
 
     sheet["F11"] = summon_cell
@@ -247,13 +247,16 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
     
     if os.name == "nt":
       try:
-        workbook.save(f"{current_dir}/data/template_convocazione.xlsx")
+        workbook.save(f"{current_dir}/data/templates/template_convocazione.xlsx")
         excel = win32.Dispatch('Excel.Application')
-        workbook = excel.Workbooks.Open(f"{current_dir}/data/template_convocazione.xlsx")
+        workbook = excel.Workbooks.Open(f"{current_dir}/data/templates/template_convocazione.xlsx")
         sheet = workbook.Worksheets(1)
         sheet.PageSetup.Zoom = False
         sheet.PageSetup.FitToPagesWide = 1
         sheet.PageSetup.FitToPagesTall = 1
+        sheet.PageSetup.Orientation = 2
+        sheet.PageSetup.CenterHorizontally = True
+        sheet.PageSetup.CenterVertically = True
         pdf_path = f"{current_dir}/Export/CONVOCAZIONE.pdf"
         if os.path.exists(pdf_path): os.remove(pdf_path)
         workbook.ExportAsFixedFormat(0, pdf_path)
@@ -262,7 +265,7 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
       finally:
         excel.Quit()
     else:
-      workbook.save("CONVOCAZIONE.xlsx")
+      workbook.save("Export/CONVOCAZIONE.xlsx")
       window["-OUTPUT-TERMINAL-"].update(f"Compilazione CONVOCAZIONE.xlsx completata correttamente. Procedere all'esportazione in PDF\n", text_color_for_value="yellow", append=True)
   
   except Exception as e:
@@ -278,7 +281,7 @@ def save_config(window:PSG.Window, current_dir:str, dit:list[dict], values:dict[
         summoned[person["NumFIS"]]["Extra"] = values[f"-EXTRA-{person["NumFIS"]}-"]
   
   try:
-    with open(f"{current_dir}/data/rimborsi.save_conf", "r", encoding="utf-8") as f:
+    with open(f"{current_dir}/data/json/save_conf", "r", encoding="utf-8") as f:
       savefile = json.load(f)
   except:
     savefile = {}
@@ -294,7 +297,7 @@ def save_config(window:PSG.Window, current_dir:str, dit:list[dict], values:dict[
   savefile["CostoBenzina"] = values["-GAS-PRICE-"]
   savefile["ArbitriConv"] = summoned
 
-  with open(f"{current_dir}/data/rimborsi.save_conf", "w", encoding="utf-8") as f:
+  with open(f"{current_dir}/data/json/save_conf", "w", encoding="utf-8") as f:
     json.dump(savefile, f, indent=4, ensure_ascii=False)
       
   window["-OUTPUT-TERMINAL-"].update(f"Configurazione salvata correttamente\n", text_color_for_value="green", append=True)
@@ -350,10 +353,10 @@ def main():
         if updated != None:
           person["DataRinnovo"] = updated["DataRinnovo"]
           count += 1
-      with open(f"{current_dir}/data/JSON/gsa.dt", "r", encoding="utf-8") as f:
+      with open(f"{current_dir}/data/json/gsa.dt", "r", encoding="utf-8") as f:
         gsa = json.load(f)
         gsa["Arbitri"] = dit
-      with open(f"{current_dir}/data/JSON/gsa.dt", "w", encoding="utf-8") as f:
+      with open(f"{current_dir}/data/json/gsa.dt", "w", encoding="utf-8") as f:
         json.dump(gsa, f, sort_keys=True, indent=4, ensure_ascii=False)
       window["-OUTPUT-TERMINAL-"].update(f"Aggiornamento dei dati di {count} arbitri completato correttamente\n", text_color_for_value="green", append=True)
 
@@ -383,18 +386,18 @@ def main():
           if not any(ref["NumFIS"] == new_referee["NumFIS"] for ref in dit):
             dit.append(new_referee)
             dit = sorted(dit, key=lambda d: d['Cognome'])
-            with open(f"{current_dir}/data/JSON/gsa.dt", "r", encoding="utf-8") as f:
+            with open(f"{current_dir}/data/json/gsa.dt", "r", encoding="utf-8") as f:
               gsa = json.load(f)
               gsa["Arbitri"] = dit
-            with open(f"{current_dir}/data/JSON/gsa.dt", "w", encoding="utf-8") as f:
+            with open(f"{current_dir}/data/json/gsa.dt", "w", encoding="utf-8") as f:
               json.dump(gsa, f, sort_keys=True, indent=4, ensure_ascii=False)
             if new_referee["Località"] not in origins and new_referee["Località"] != "":
               origins.append(new_referee["Località"])
               origins.sort()
-              with open(f"{current_dir}/data/JSON/gsa.dt", "r", encoding="utf-8") as f:
+              with open(f"{current_dir}/data/json/gsa.dt", "r", encoding="utf-8") as f:
                 gsa = json.load(f)
                 gsa["Città_Origine"] = origins
-              with open(f"{current_dir}/data/JSON/gsa.dt", "w", encoding="utf-8") as f:
+              with open(f"{current_dir}/data/json/gsa.dt", "w", encoding="utf-8") as f:
                 json.dump(gsa, f, sort_keys=True, indent=4, ensure_ascii=False)
             window.close()
             window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)#Re-create window to update referees tab 
@@ -418,10 +421,10 @@ def main():
       old_ref["DataRinnovo"] = f"{values["-EDIT-REFEREE-RENEWAL-YEAR-"]}-{values["-EDIT-REFEREE-RENEWAL-MONTH-"]}-{values["-EDIT-REFEREE-RENEWAL-DAY-"]}"
       old_ref["Qualifica"] = values["-EDIT-REFEREE-ROLE-"].upper().strip()
       old_ref["Domicilio"] = values["-EDIT-REFEREE-ADDRESS-"].title().strip()
-      with open(f"{current_dir}/data/JSON/gsa.dt", "r", encoding="utf-8") as f:
+      with open(f"{current_dir}/data/json/gsa.dt", "r", encoding="utf-8") as f:
         gsa = json.load(f)
         gsa["Arbitri"] = dit
-      with open(f"{current_dir}/data/JSON/gsa.dt", "w", encoding="utf-8") as f:
+      with open(f"{current_dir}/data/json/gsa.dt", "w", encoding="utf-8") as f:
         json.dump(gsa, f, sort_keys=True, indent=4, ensure_ascii=False)
       window.close()
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)
@@ -431,10 +434,10 @@ def main():
       FIS_id, _ = str(values["-EDIT-REFEREE-CHOICE-"]).split(" - ")
       edit_ref_chosen = next(filter(lambda ref: ref['NumFIS'] == FIS_id, dit), None)
       dit.remove(edit_ref_chosen)
-      with open(f"{current_dir}/data/JSON/gsa.dt", "r", encoding="utf-8") as f:
+      with open(f"{current_dir}/data/json/gsa.dt", "r", encoding="utf-8") as f:
         gsa = json.load(f)
         gsa["Arbitri"] = dit
-      with open(f"{current_dir}/data/JSON/gsa.dt", "w", encoding="utf-8") as f:
+      with open(f"{current_dir}/data/json/gsa.dt", "w", encoding="utf-8") as f:
         json.dump(gsa, f, sort_keys=True, indent=4, ensure_ascii=False)
       window.close()
       window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)
@@ -566,7 +569,7 @@ def main():
                     form_fields[19]: renewal_date,
                   }
 
-                  fillpdfs.write_fillable_pdf('data/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
+                  fillpdfs.write_fillable_pdf('data/templates/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
                   window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
 
               except Exception as e:
@@ -589,7 +592,7 @@ def main():
       save_config(window, current_dir, dit, values, journeys)
 
     if events == "-LOAD-CONFIG-":
-      with open(f"{current_dir}/data/rimborsi.save_conf", "r", encoding="utf-8") as f:
+      with open(f"{current_dir}/data/json/save_conf", "r", encoding="utf-8") as f:
         savefile = json.load(f)
       
       window["-COMPETITION-NAME-"].update(savefile["NomeGara"])
@@ -646,6 +649,18 @@ def main():
         if person["NumFIS"] != "000000":
           if values[f"-SUMMONED-{person["NumFIS"]}-"]:
             window[f"-DAYS-{person["NumFIS"]}-"].update(value="")
+
+    if events == "-VIEW-EXPORT":
+      system = platform.system()
+      path = f"{current_dir}/Export"
+      if system == "Windows":
+        os.startfile(path)
+      elif system == "Darwin":  # macOS
+        subprocess.Popen(['open', path])
+      elif system == "Linux":
+        subprocess.Popen(['xdg-open', os.path.dirname(path)])
+      else:
+        PSG.PopupQuickMessage(f"Unsupported OS: {system}", background_color="red")
 
 if __name__ == "__main__":
   main()

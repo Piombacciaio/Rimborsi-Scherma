@@ -100,3 +100,4 @@ Disclaimer: data scraping such as the one used for maps distances is against the
 - pip requirements (`pip install -U -r requirements.txt`)
 - Internet connection (Google Maps Scraper)
 - Excel (Export to pdf, as of now windows only)
+- xdg-open (Linux only)

@@ -1,7 +1,7 @@
 data/consensi
 data/JSON/gsa.dt
 data/__pycache__
-data/template_*
+data/Templates*
 env
 Export
 pozzo.json
@@ -10,4 +10,4 @@ TODO*
 *.ico
 *.fis_repo
 *.backup
-data/rimborsi.save_conf
+*save_conf
