@@ -1,5 +1,5 @@
 data/consensi
-data/JSON/dt.json
+data/JSON/gsa.dt
 data/__pycache__
 data/template_*
 env

@@ -31590,5 +31590,662 @@
     "villasor": {
         "codice_catastale": "M025",
         "codice_provinciale": "SU"
+    },
+    "afghanistan": {
+        "codice_catastale": "Z200"
+    },
+    "albania": {
+        "codice_catastale": "Z100"
+    },
+    "algeria": {
+        "codice_catastale": "Z301"
+    },
+    "andorra": {
+        "codice_catastale": "Z101"
+    },
+    "angola": {
+        "codice_catastale": "Z302"
+    },
+    "anguilla": {
+        "codice_catastale": "Z529"
+    },
+    "antigua e barbuda": {
+        "codice_catastale": "Z532"
+    },
+    "arabia Saudita": {
+        "codice_catastale": "Z203"
+    },
+    "argentina": {
+        "codice_catastale": "Z600"
+    },
+    "armenia": {
+        "codice_catastale": "Z252"
+    },
+    "aruba": {
+        "codice_catastale": "Z501"
+    },
+    "australia": {
+        "codice_catastale": "Z700"
+    },
+    "austria": {
+        "codice_catastale": "Z102"
+    },
+    "azerbaigian": {
+        "codice_catastale": "Z253"
+    },
+    "bahamas": {
+        "codice_catastale": "Z502"
+    },
+    "bahrein": {
+        "codice_catastale": "Z204"
+    },
+    "bangladesh": {
+        "codice_catastale": "Z249"
+    },
+    "barbados": {
+        "codice_catastale": "Z522"
+    },
+    "belgio": {
+        "codice_catastale": "Z103"
+    },
+    "belize": {
+        "codice_catastale": "Z512"
+    },
+    "benin": {
+        "codice_catastale": "Z314"
+    },
+    "bermuda": {
+        "codice_catastale": "Z400"
+    },
+    "bhutan": {
+        "codice_catastale": "Z205"
+    },
+    "bielorussia": {
+        "codice_catastale": "Z139"
+    },
+    "bolivia": {
+        "codice_catastale": "Z601"
+    },
+    "bosnia-erzegovina": {
+        "codice_catastale": "Z153"
+    },
+    "botswana": {
+        "codice_catastale": "Z358"
+    },
+    "brasile": {
+        "codice_catastale": "Z602"
+    },
+    "brunei darussalam": {
+        "codice_catastale": "Z207"
+    },
+    "bulgaria": {
+        "codice_catastale": "Z104"
+    },
+    "burkina faso": {
+        "codice_catastale": "Z354"
+    },
+    "burundi": {
+        "codice_catastale": "Z305"
+    },
+    "cambogia": {
+        "codice_catastale": "Z208"
+    },
+    "camerun": {
+        "codice_catastale": "Z306"
+    },
+    "canada": {
+        "codice_catastale": "Z401"
+    },
+    "capo verde": {
+        "codice_catastale": "Z307"
+    },
+    "ciad": {
+        "codice_catastale": "Z309"
+    },
+    "cile": {
+        "codice_catastale": "Z603"
+    },
+    "cina": {
+        "codice_catastale": "Z210"
+    },
+    "cipro": {
+        "codice_catastale": "Z211"
+    },
+    "colombia": {
+        "codice_catastale": "Z604"
+    },
+    "comore": {
+        "codice_catastale": "Z310"
+    },
+    "congo": {
+        "codice_catastale": "Z311"
+    },
+    "corea del nord": {
+        "codice_catastale": "Z214"
+    },
+    "corea del sud": {
+        "codice_catastale": "Z213"
+    },
+    "costa rica": {
+        "codice_catastale": "Z503"
+    },
+    "costa d'avorio": {
+        "codice_catastale": "Z313"
+    },
+    "croazia": {
+        "codice_catastale": "Z149"
+    },
+    "cuba": {
+        "codice_catastale": "Z504"
+    },
+    "danimarca": {
+        "codice_catastale": "Z107"
+    },
+    "dominica": {
+        "codice_catastale": "Z526"
+    },
+    "ecuador": {
+        "codice_catastale": "Z605"
+    },
+    "egitto": {
+        "codice_catastale": "Z336"
+    },
+    "el salvador": {
+        "codice_catastale": "Z506"
+    },
+    "emirati arabi uniti": {
+        "codice_catastale": "Z215"
+    },
+    "eritrea": {
+        "codice_catastale": "Z368"
+    },
+    "estonia": {
+        "codice_catastale": "Z144"
+    },
+    "eswatini": {
+        "codice_catastale": "Z349"
+    },
+    "etiopia": {
+        "codice_catastale": "Z315"
+    },
+    "federazione russa": {
+        "codice_catastale": "Z154"
+    },
+    "figi": {
+        "codice_catastale": "Z704"
+    },
+    "filippine": {
+        "codice_catastale": "Z216"
+    },
+    "finlandia": {
+        "codice_catastale": "Z109"
+    },
+    "francia": {
+        "codice_catastale": "Z110"
+    },
+    "gabon": {
+        "codice_catastale": "Z316"
+    },
+    "gambia": {
+        "codice_catastale": "Z317"
+    },
+    "Georgia": {
+        "codice_catastale": "Z254"
+    },
+    "germania": {
+        "codice_catastale": "Z112"
+    },
+    "ghana": {
+        "codice_catastale": "Z318"
+    },
+    "giamaica": {
+        "codice_catastale": "Z507"
+    },
+    "giappone": {
+        "codice_catastale": "Z219"
+    },
+    "gibilterra": {
+        "codice_catastale": "Z113"
+    },
+    "gibuti": {
+        "codice_catastale": "Z361"
+    },
+    "giordania": {
+        "codice_catastale": "Z220"
+    },
+    "grecia": {
+        "codice_catastale": "Z115"
+    },
+    "grenada": {
+        "codice_catastale": "Z524"
+    },
+    "groenlandia": {
+        "codice_catastale": "Z402"
+    },
+    "guatemala": {
+        "codice_catastale": "Z509"
+    },
+    "guinea": {
+        "codice_catastale": "Z319"
+    },
+    "guinea equatoriale": {
+        "codice_catastale": "Z321"
+    },
+    "guinea-bissau": {
+        "codice_catastale": "Z320"
+    },
+    "guyana": {
+        "codice_catastale": "Z606"
+    },
+    "haiti": {
+        "codice_catastale": "Z510"
+    },
+    "honduras": {
+        "codice_catastale": "Z511"
+    },
+    "india": {
+        "codice_catastale": "Z222"
+    },
+    "indonesia": {
+        "codice_catastale": "Z223"
+    },
+    "iran": {
+        "codice_catastale": "Z224"
+    },
+    "iraq": {
+        "codice_catastale": "Z225"
+    },
+    "irlanda": {
+        "codice_catastale": "Z116"
+    },
+    "islanda": {
+        "codice_catastale": "Z117"
+    },
+    "isola di man": {
+        "codice_catastale": "Z122"
+    },
+    "isole cayman": {
+        "codice_catastale": "Z530"
+    },
+    "isole cook (NZ)": {
+        "codice_catastale": "Z703"
+    },
+    "isole falkland (Malvine)": {
+        "codice_catastale": "Z609"
+    },
+    "isole fær Øer": {
+        "codice_catastale": "Z108"
+    },
+    "isole marshall": {
+        "codice_catastale": "Z711"
+    },
+    "isole pitcairn": {
+        "codice_catastale": "Z722"
+    },
+    "isole salomone": {
+        "codice_catastale": "Z724"
+    },
+    "isole turks e caicos": {
+        "codice_catastale": "Z519"
+    },
+    "isole vergini britanniche": {
+        "codice_catastale": "Z525"
+    },
+    "israele": {
+        "codice_catastale": "Z226"
+    },
+    "kazakhstan": {
+        "codice_catastale": "Z255"
+    },
+    "kenya": {
+        "codice_catastale": "Z322"
+    },
+    "kirghizistan": {
+        "codice_catastale": "Z256"
+    },
+    "kiribati": {
+        "codice_catastale": "Z731"
+    },
+    "kosovo": {
+        "codice_catastale": "Z160"
+    },
+    "kuwait": {
+        "codice_catastale": "Z227"
+    },
+    "laos": {
+        "codice_catastale": "Z228"
+    },
+    "lesotho": {
+        "codice_catastale": "Z359"
+    },
+    "lettonia": {
+        "codice_catastale": "Z145"
+    },
+    "libano": {
+        "codice_catastale": "Z229"
+    },
+    "liberia": {
+        "codice_catastale": "Z325"
+    },
+    "libia": {
+        "codice_catastale": "Z326"
+    },
+    "liechtenstein": {
+        "codice_catastale": "Z119"
+    },
+    "lituania": {
+        "codice_catastale": "Z146"
+    },
+    "lussemburgo": {
+        "codice_catastale": "Z120"
+    },
+    "macedonia del nord": {
+        "codice_catastale": "Z148"
+    },
+    "madagascar": {
+        "codice_catastale": "Z327"
+    },
+    "malawi": {
+        "codice_catastale": "Z328"
+    },
+    "malaysia": {
+        "codice_catastale": "Z247"
+    },
+    "maldive": {
+        "codice_catastale": "Z232"
+    },
+    "mali": {
+        "codice_catastale": "Z329"
+    },
+    "malta": {
+        "codice_catastale": "Z121"
+    },
+    "marocco": {
+        "codice_catastale": "Z330"
+    },
+    "mauritania": {
+        "codice_catastale": "Z331"
+    },
+    "maurizio": {
+        "codice_catastale": "Z332"
+    },
+    "messico": {
+        "codice_catastale": "Z514"
+    },
+    "moldova": {
+        "codice_catastale": "Z140"
+    },
+    "monaco": {
+        "codice_catastale": "Z123"
+    },
+    "mongolia": {
+        "codice_catastale": "Z233"
+    },
+    "montenegro": {
+        "codice_catastale": "Z159"
+    },
+    "montserrat": {
+        "codice_catastale": "Z531"
+    },
+    "mozambico": {
+        "codice_catastale": "Z333"
+    },
+    "myanmar/birmania": {
+        "codice_catastale": "Z206"
+    },
+    "namibia": {
+        "codice_catastale": "Z300"
+    },
+    "nauru": {
+        "codice_catastale": "Z713"
+    },
+    "nepal": {
+        "codice_catastale": "Z234"
+    },
+    "nicaragua": {
+        "codice_catastale": "Z515"
+    },
+    "niger": {
+        "codice_catastale": "Z334"
+    },
+    "nigeria": {
+        "codice_catastale": "Z335"
+    },
+    "norvegia": {
+        "codice_catastale": "Z125"
+    },
+    "nuova caledonia": {
+        "codice_catastale": "Z716"
+    },
+    "nuova zelanda": {
+        "codice_catastale": "Z719"
+    },
+    "olanda": {
+        "codice_catastale": "Z126"
+    },
+    "oman": {
+        "codice_catastale": "Z235"
+    },
+    "paesi bassi": {
+        "codice_catastale": "Z126"
+    },
+    "pakistan": {
+        "codice_catastale": "Z236"
+    },
+    "repubblica di palau": {
+        "codice_catastale": "Z734"
+    },
+    "palestina": {
+        "codice_catastale": "Z161"
+    },
+    "panama": {
+        "codice_catastale": "Z516"
+    },
+    "papua nuova guinea": {
+        "codice_catastale": "Z730"
+    },
+    "paraguay": {
+        "codice_catastale": "Z610"
+    },
+    "perù": {
+        "codice_catastale": "Z611"
+    },
+    "polinesia francese": {
+        "codice_catastale": "Z723"
+    },
+    "polonia": {
+        "codice_catastale": "Z127"
+    },
+    "portogallo": {
+        "codice_catastale": "Z128"
+    },
+    "qatar": {
+        "codice_catastale": "Z237"
+    },
+    "regno unito": {
+        "codice_catastale": "Z114"
+    },
+    "repubblica centrafricana": {
+        "codice_catastale": "Z308"
+    },
+    "repubblica democratica del congo": {
+        "codice_catastale": "Z312"
+    },
+    "repubblica dominicana": {
+        "codice_catastale": "Z505"
+    },
+    "repubblica ceca": {
+        "codice_catastale": "Z156"
+    },
+    "romania": {
+        "codice_catastale": "Z129"
+    },
+    "ruanda": {
+        "codice_catastale": "Z338"
+    },
+    "sahara occidentale": {
+        "codice_catastale": "Z339"
+    },
+    "saint kitts e nevis": {
+        "codice_catastale": "Z533"
+    },
+    "saint pierre e miquelon": {
+        "codice_catastale": "Z403"
+    },
+    "saint vincent e grenadine": {
+        "codice_catastale": "Z528"
+    },
+    "saint-martin (FR)": {
+        "codice_catastale": "Z110"
+    },
+    "samoa": {
+        "codice_catastale": "Z726"
+    },
+    "san marino": {
+        "codice_catastale": "Z130"
+    },
+    "sant'elena, ascensione e tristan da cunha": {
+        "codice_catastale": "Z340"
+    },
+    "santa lucia": {
+        "codice_catastale": "Z527"
+    },
+    "sao tomé e principe": {
+        "codice_catastale": "Z341"
+    },
+    "senegal": {
+        "codice_catastale": "Z343"
+    },
+    "serbia": {
+        "codice_catastale": "Z158"
+    },
+    "seychelles": {
+        "codice_catastale": "Z342"
+    },
+    "sierra leone": {
+        "codice_catastale": "Z344"
+    },
+    "singapore": {
+        "codice_catastale": "Z248"
+    },
+    "sint maarten (NL)": {
+        "codice_catastale": "Z126"
+    },
+    "siria": {
+        "codice_catastale": "Z240"
+    },
+    "slovacchia": {
+        "codice_catastale": "Z155"
+    },
+    "slovenia": {
+        "codice_catastale": "Z150"
+    },
+    "somalia": {
+        "codice_catastale": "Z345"
+    },
+    "spagna": {
+        "codice_catastale": "Z131"
+    },
+    "sri lanka": {
+        "codice_catastale": "Z209"
+    },
+    "stati federati di micronesia": {
+        "codice_catastale": "Z735"
+    },
+    "stati uniti d'america": {
+        "codice_catastale": "Z404"
+    },
+    "stato della città del vaticano": {
+        "codice_catastale": "Z106"
+    },
+    "sud sudan": {
+        "codice_catastale": "Z907"
+    },
+    "sudafrica": {
+        "codice_catastale": "Z347"
+    },
+    "sudan": {
+        "codice_catastale": "Z348"
+    },
+    "suriname": {
+        "codice_catastale": "Z608"
+    },
+    "svezia": {
+        "codice_catastale": "Z132"
+    },
+    "svizzera": {
+        "codice_catastale": "Z133"
+    },
+    "tagikistan": {
+        "codice_catastale": "Z257"
+    },
+    "taiwan": {
+        "codice_catastale": "Z217"
+    },
+    "tanzania": {
+        "codice_catastale": "Z357"
+    },
+    "thailandia": {
+        "codice_catastale": "Z241"
+    },
+    "timor leste": {
+        "codice_catastale": "Z242"
+    },
+    "togo": {
+        "codice_catastale": "Z351"
+    },
+    "tonga": {
+        "codice_catastale": "Z728"
+    },
+    "trinidad e tobago": {
+        "codice_catastale": "Z612"
+    },
+    "tunisia": {
+        "codice_catastale": "Z352"
+    },
+    "turchia": {
+        "codice_catastale": "Z243"
+    },
+    "turkmenistan": {
+        "codice_catastale": "Z258"
+    },
+    "tuvalu": {
+        "codice_catastale": "Z732"
+    },
+    "ucraina": {
+        "codice_catastale": "Z138"
+    },
+    "uganda": {
+        "codice_catastale": "Z353"
+    },
+    "ungheria": {
+        "codice_catastale": "Z134"
+    },
+    "uruguay": {
+        "codice_catastale": "Z613"
+    },
+    "uzbekistan": {
+        "codice_catastale": "Z259"
+    },
+    "vanuatu": {
+        "codice_catastale": "Z733"
+    },
+    "venezuela": {
+        "codice_catastale": "Z614"
+    },
+    "vietnam": {
+        "codice_catastale": "Z251"
+    },
+    "wallis e futuna": {
+        "codice_catastale": "Z729"
+    },
+    "yemen": {
+        "codice_catastale": "Z246"
+    },
+    "zambia": {
+        "codice_catastale": "Z355"
+    },
+    "zimbabwe": {
+        "codice_catastale": "Z337"
     }
 }
