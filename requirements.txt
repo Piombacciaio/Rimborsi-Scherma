@@ -3,3 +3,4 @@ openpyxl
 PySimpleGUI
 pywin32; sys_platform == 'win32'
 selenium
+xmltodict
