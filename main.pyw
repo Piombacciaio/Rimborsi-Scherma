@@ -63,6 +63,15 @@ def get_distance(origins: list[str]|str, destination:str, window:PSG.Window, jou
 
 def load_data(directory:str) -> tuple[list[dict], list[str], dict[str, dict], list]:
   """Load data for referees, origins, payments and pdf template"""
+  default_payload = """
+{
+  "Arbitri": [],
+  "Città_Origine": []
+}"""
+  if not os.path.exists(f"{directory}/data/json/gsa.dt", encoding="utf-8"):
+    with open(f"{directory}/data/json/gsa.dt", "w"):
+      json.dump(default_payload, f, indent=4, ensure_ascii=False)
+
   with open(f"{directory}/data/json/gsa.dt", "r", encoding="utf-8") as f:
     gsa = json.load(f)
     dit = gsa["Arbitri"]
@@ -408,6 +417,9 @@ def main():
 
   window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", default_view, icon=icon(), finalize=True, keep_on_top=True)
   
+  if len(form_fields) == 0:
+    window["-OUTPUT-TERMINAL-"].update("Il file template_rimborso.pdf non contiene nessun campo compilabile.\n", text_color_for_value="red", append=True)
+
   while True:
     try:
       events:str

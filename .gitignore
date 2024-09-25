@@ -1,13 +1,11 @@
 data/consensi
-data/JSON/gsa.dt
 data/__pycache__
 data/Templates*
 env
 Export
-pozzo.json
 TODO*
 *.png
 *.ico
 *.fis_repo
-*.backup
+*.dt
 *save_conf

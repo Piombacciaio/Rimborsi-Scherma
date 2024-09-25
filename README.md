@@ -2,9 +2,9 @@
 
 This script helps me automate some of the most tedious work as a computer technician for fencing competitions: making payment documents for all the people involved.
 
-For privacy reasons some files are missing (e.g. `data/JSON/gsa.dt` and `data/template.pdf`)
+For privacy reasons some files are missing (e.g. `data/JSON/gsa.dt`, `data/templates/template_convocazione.xlsx` and `data/templates/template_rimborso.pdf`).
 
-The keys for `data/template.pdf` are saved in `data/keys` so they shoud give an idea of what the document is like
+The program will not work without them, you can create two blank templates (an empty xlsx and a pdf with fillable entries for which the keys are in `data/keys`)
 
 ## Schemas
 
@@ -36,9 +36,9 @@ The schema for `data/JSON/gsa.dt` is as follows:
 
 Values for `LuogoNascita` and `Domicilio` are sometimes null as they are not mandatory to comunicate
 
-The extensions `*.save_conf` and `*.fis_repo` are json like files with a specific schema
+The files `*save_conf` and `*.fis_repo` are json like files with a specific schema
 
-The schema for `*.save_conf` files is:
+The schema for `*save_conf` files is:
 
 ```jsonc
 {
