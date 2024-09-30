@@ -57,6 +57,7 @@ def get_distance(origins: list[str]|str, destination:str, window:PSG.Window, jou
         place = urllib.parse.unquote_plus(place)
         journeys[place.upper()] = 0
     window["-OUTPUT-TERMINAL-"].update(f"Tratte caricate correttamente\n", text_color_for_value="green", append=True)
+    PSG.Button.click(window["-UPDATE-"])
     driver.quit()
   except Exception as e:
     window["-OUTPUT-TERMINAL-"].update(f"Il caricamento delle tratte ha causato il seguente errore {e}\n", text_color_for_value="red", append=True)
@@ -68,7 +69,7 @@ def load_data(directory:str) -> tuple[list[dict], list[str], dict[str, dict], li
   "Arbitri": [],
   "Città_Origine": []
 }"""
-  if not os.path.exists(f"{directory}/data/json/gsa.dt", encoding="utf-8"):
+  if not os.path.exists(f"{directory}/data/json/gsa.dt"):
     with open(f"{directory}/data/json/gsa.dt", "w"):
       json.dump(default_payload, f, indent=4, ensure_ascii=False)
 
@@ -87,30 +88,30 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     return PSG.Text("void", text_color="black")
 
   comp_tab = [
-    [PSG.Text("Nome Gara", s=(11,1)), PSG.Input("Nome in locandina", key="-COMPETITION-NAME-", s=(55,1))], 
+    [PSG.Text("Nome Gara", s=(11,1)), PSG.Input("Nome in locandina", enable_events=True, key="-COMPETITION-NAME-", s=(55,1))], 
     [PSG.Text("Tipo Gara", s=(11,1)), PSG.Combo(["REG", "INTREG", "NAZ"], "Tipo", s=(8,1), key="-COMPETITION-TYPE-", button_background_color="gray", button_arrow_color="white", enable_events=True)],
-    [PSG.Text("Città Gara", s=(11,1)), PSG.Input("Città", key="-COMPETITION-PLACE-", s=(55,1))], 
-    [PSG.Text("Indirizzo Gara", s=(11,1)), PSG.Input("Via", key="-COMPETITION-ADDRESS-", s=(41,1)), PSG.Button("Calcola Tratte", key="-LOAD-ROUTES-", button_color="gray", pad=(6,0))], 
+    [PSG.Text("Città Gara", s=(11,1)), PSG.Input("Città", enable_events=True, key="-COMPETITION-PLACE-", s=(55,1))], 
+    [PSG.Text("Indirizzo Gara", s=(11,1)), PSG.Input("Via", enable_events=True, key="-COMPETITION-ADDRESS-", s=(41,1)), PSG.Button("Calcola Tratte", key="-LOAD-ROUTES-", button_color="gray", pad=(6,0))], 
     [PSG.Text("Data Gara", s=(11,1)), 
-    PSG.Combo(["%02d.%02d" % (x, x + 1) for x in range(1, 31)], default_value="%02d.%02d" % (day, day + 1), key="-COMPETITION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d.%02d" % (x, x + 1) for x in range(1, 31)], default_value="%02d.%02d" % (day, day + 1), enable_events=True, key="-COMPETITION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % month, key="-COMPETITION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % month, enable_events=True, key="-COMPETITION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, key="-COMPETITION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, enable_events=True, key="-COMPETITION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Convocazione", s=(11,1)), 
-    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value= "%02d" % (day - 8 if day - 8 > 0 else (calendar.monthrange(year, (month - 1 if month - 1 > 0 else 12))[1] + day - 8)), key="-CONVOCATION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value= "%02d" % (day - 8 if day - 8 > 0 else (calendar.monthrange(year, (month - 1 if month - 1 > 0 else 12))[1] + day - 8)), enable_events=True, key="-CONVOCATION-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % (month if day - 8 > 0 else (month - 1 if month - 1 > 0 else 12)), key="-CONVOCATION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % (month if day - 8 > 0 else (month - 1 if month - 1 > 0 else 12)), enable_events=True, key="-CONVOCATION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value= (year if day - 8 > 0 and month - 1 > 0 else year - 1) , key="-CONVOCATION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value= (year if day - 8 > 0 and month - 1 > 0 else year - 1), enable_events=True, key="-CONVOCATION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Data Firma", s=(11,1)), 
-    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="%02d" % day, key="-SIGN-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="%02d" % day, enable_events=True, key="-SIGN-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % month, key="-SIGN-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
+    PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % month, enable_events=True, key="-SIGN-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
-    [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", key="-GAS-PRICE-", s=(5,1)), PSG.Text("€/L")],
-    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Vedi Export", key="-VIEW-EXPORT", button_color="gray"), PSG.Push(), PSG.Button("Ricarica Config", key="-RLD-CFG-", button_color="gray")],
+    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, enable_events=True, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", enable_events=True, key="-GAS-PRICE-", s=(5,1)), PSG.Text("€/L")],
+    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Convocazione", key="-CONV-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Vedi Export", key="-VIEW-EXPORT-", button_color="gray"), PSG.Push(), PSG.Button("Ricarica Config", key="-RLD-CFG-", button_color="gray")],
     [PSG.VPush()],
     [PSG.Text("Output"), PSG.Line()],
     [PSG.Multiline(disabled=True, autoscroll=True, expand_x=True, auto_refresh=True, s=(1, 6), key="-OUTPUT-TERMINAL-", sbar_arrow_color="white", sbar_background_color="grey")],
@@ -120,10 +121,10 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
   
   tooltip_dit = "Pozzo aggiornato con le nuove date di rinnovo del tesseramento"
   dit_list = ([
-    PSG.Checkbox(text="", key=f"-SUMMONED-{person["NumFIS"]}-", s=(1,1)), 
+    PSG.Checkbox(text="", key=f"-SUMMONED-{person["NumFIS"]}-", enable_events=True, s=(1,1)), 
     PSG.Text(f"{person["Cognome"]} {person["Nome"]}",s=(40,1), enable_events=True, key=f"-NAME-{person["NumFIS"]}-"),
     PSG.Input("", key= f"-DAYS-{person["NumFIS"]}-", s=(5,1)),
-    PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(17,0))] for person in dit if person["NumFIS"] != "000000")
+    PSG.Checkbox(text="", key=f"-EXTRA-{person["NumFIS"]}-", s=(1,1), pad=(17,0))] for person in dit)
   dit_tab = [
     [PSG.Text("Conv."), PSG.Push(), PSG.Text("Arbitro"), PSG.Push(), PSG.Text("Giorni "), PSG.Text("Extra"), PSG.Text("   ")],
     [PSG.Column(dit_list, s=(1,305), vertical_scroll_only=True, expand_x=True, scrollable=True, sbar_arrow_color="white", sbar_background_color="grey")],
@@ -160,7 +161,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray", disabled=True)]
     ]
   
-  combo_edit_text = list(f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}" for person in dit  if person["NumFIS"] != "000000")
+  combo_edit_text = list(f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}" for person in dit)
   edit_tab = [
     [PSG.Text("Selezione Arbitro"), PSG.Combo(combo_edit_text, "Seleziona", key="-EDIT-REFEREE-CHOICE-", enable_events=True, s=(37,1), button_background_color="gray", button_arrow_color="white"),
      PSG.Button("Elimina Arbitro", key="-EDIT-REFEREE-DEL-", button_color="gray", disabled=True)],
@@ -223,7 +224,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
       )
     ],
     [PSG.Button("Salva Configurazione", key="-SAVE-CONFIG-", button_color="gray"), PSG.Button("Carica Configurazione", key="-LOAD-CONFIG-", button_color="gray"),
-     PSG.Checkbox("KeepOnTop", default=True, key="-CHANGE-VISIBILITY-", enable_events=True)]
+     PSG.Checkbox("KeepOnTop", default=True, key="-CHANGE-VISIBILITY-", enable_events=True), PSG.Button("", k="-UPDATE-", visible=False)]
   ]
 
   return default_view
@@ -307,11 +308,10 @@ def fill_summoning_xlsx(window:PSG.Window ,summon_day:str, summon_month:str, sum
 def save_config(window:PSG.Window, current_dir:str, dit:list[dict], values:dict[str], journeys:dict):
   summoned = {}
   for person in dit:
-    if person["NumFIS"] != "000000":
-      if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
-        summoned[person["NumFIS"]] = {}
-        summoned[person["NumFIS"]]["Giorni"] = values[f"-DAYS-{person["NumFIS"]}-"]
-        summoned[person["NumFIS"]]["Extra"] = values[f"-EXTRA-{person["NumFIS"]}-"]
+    if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
+      summoned[person["NumFIS"]] = {}
+      summoned[person["NumFIS"]]["Giorni"] = values[f"-DAYS-{person["NumFIS"]}-"]
+      summoned[person["NumFIS"]]["Extra"] = values[f"-EXTRA-{person["NumFIS"]}-"]
   
   try:
     with open(f"{current_dir}/data/json/save_conf", "r", encoding="utf-8") as f:
@@ -429,7 +429,6 @@ def main():
       if events == PSG.WIN_CLOSED: break
       
       if events == "-CLR-OUT-": window["-OUTPUT-TERMINAL-"].update("")
-      if events == "-COMPETITION-TYPE-": window["-EXPORT-"].update(disabled = False)
       #if events == "-DEBUG-": print("Hi!") #Left this here even if not needed 'cause my best friend (she made this) was extremely proud of her work
       if events == "-RLD-CFG-": 
         dit, origins, payments, form_fields = load_data(current_dir)
@@ -439,6 +438,15 @@ def main():
       if events == "-UPDATED-REPO-": window["-UPDATE-DIT-"].update(disabled=False)
       if events == "-CHANGE-VISIBILITY-": window.keep_on_top_clear() if not values["-CHANGE-VISIBILITY-"] else window.keep_on_top_set()
 
+      if events.startswith(("-COMPETITION-", "-CONVOCATION-", "-SIGN-", "-GAS-", "-NAME-", "-SUMMONED-")) or events == "-UPDATE-":
+        disabled_check = not (len(values["-COMPETITION-NAME-"].strip()) > 0 and len(values["-COMPETITION-TYPE-"].strip()) > 0 and len(values["-COMPETITION-PLACE-"].strip()) > 0 
+                              and len(values["-COMPETITION-ADDRESS-"].strip()) > 0 and len(str(values["-COMPETITION-DAY-"]).strip()) > 0  and len(str(values["-COMPETITION-MONTH-"]).strip()) > 0 
+                              and len(str(values["-COMPETITION-YEAR-"]).strip()) > 0 and len(str(values["-CONVOCATION-DAY-"]).strip()) > 0 and len(str(values["-CONVOCATION-MONTH-"]).strip()) > 0
+                              and len(str(values["-CONVOCATION-YEAR-"]).strip()) > 0 and len(str(values["-SIGN-DAY-"]).strip()) > 0 and len(str(values["-SIGN-MONTH-"]).strip()) > 0 
+                              and len(str(values["-SIGN-YEAR-"]).strip()) > 0 and len(values["-GAS-PRICE-"].strip()) > 0 and len(journeys) == len(origins)
+                              and any(values[f"-SUMMONED-{person["NumFIS"]}-"] for person in dit))
+        window["-EXPORT-"].update(disabled = disabled_check)
+      
       if events == "-LOAD-ROUTES-": 
         journeys = {}
         Thread(target=get_distance, args=[origins, values["-COMPETITION-ADDRESS-"], window, journeys]).start() #Moved get_distance to a separate Thread to avoid freezing the window
@@ -586,93 +594,92 @@ def main():
             competition_place = place = values["-COMPETITION-PLACE-"].upper()
             sign_date:str = f"{values["-SIGN-DAY-"]}/{values["-SIGN-MONTH-"]}/{values["-SIGN-YEAR-"]}"
             for person in dit:
-              if person["NumFIS"] != "000000":
-                try:
-                  if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
-                    referee_name:str = person["Cognome"] + ' ' + person["Nome"]
-                    window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name}\n", text_color_for_value="green", append=True)
-                    referee_birthday:str = person["DataNascita"]
-                    year:str
-                    month:str
-                    day:str
-                    year, month, day = referee_birthday.split("-")
-                    referee_birthday:str = f'{day}/{month}/{year}'
-                    sex:bool = person["MaschioFemmina"]
-                    if person["LuogoNascita"] != None:
-                      referee_birth_place:str = person["LuogoNascita"] + ', ' + referee_birthday
-                      referee_tax_code:str = cf.calcolo_codice(person["Cognome"], person["Nome"], day, month, year, person["LuogoNascita"], sex)
-                    else:
-                      referee_birth_place:str = " "
-                      referee_tax_code:str = " "
-                          
-                    try: referee_residence_address:str = person["Domicilio"] 
-                    except KeyError: referee_residence_address:str = " "
-                          
-                    referee_role:str = person["Qualifica"]
-                    if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
-                    if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
-                    if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
-                    if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
-                    days = int(values[f"-DAYS-{person["NumFIS"]}-"])
-                    token_value:int = payments[competition_type][referee_role]["GETTONE"]
-                    total_token_value:int = int(days * token_value)
-                    if values[f"-EXTRA-{person["NumFIS"]}-"] == True: 
-                      total_token_value:int = total_token_value + token_value
+              try:
+                if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
+                  referee_name:str = person["Cognome"] + ' ' + person["Nome"]
+                  window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name}\n", text_color_for_value="green", append=True)
+                  referee_birthday:str = person["DataNascita"]
+                  year:str
+                  month:str
+                  day:str
+                  year, month, day = referee_birthday.split("-")
+                  referee_birthday:str = f'{day}/{month}/{year}'
+                  sex:bool = person["MaschioFemmina"]
+                  if person["LuogoNascita"] != None:
+                    referee_birth_place:str = person["LuogoNascita"] + ', ' + referee_birthday
+                    referee_tax_code:str = cf.calcolo_codice(person["Cognome"], person["Nome"], day, month, year, person["LuogoNascita"], sex)
+                  else:
+                    referee_birth_place:str = " "
+                    referee_tax_code:str = " "
+                        
+                  try: referee_residence_address:str = person["Domicilio"] 
+                  except KeyError: referee_residence_address:str = " "
+                        
+                  referee_role:str = person["Qualifica"]
+                  if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
+                  if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
+                  if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
+                  if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
+                  days = int(values[f"-DAYS-{person["NumFIS"]}-"])
+                  token_value:int = payments[competition_type][referee_role]["GETTONE"]
+                  total_token_value:int = int(days * token_value)
+                  if values[f"-EXTRA-{person["NumFIS"]}-"] == True: 
+                    total_token_value:int = total_token_value + token_value
 
-                    travel_distance:int = math.ceil(journeys[person["Località"].upper()])
-                    if travel_distance < 50: 
-                      journey = math.ceil(gas / 10 * 2 * days * travel_distance)
-                    else: 
-                      journey = math.ceil(gas / 10 * 2 * travel_distance)
+                  travel_distance:int = math.ceil(journeys[person["Località"].upper()])
+                  if travel_distance < 50: 
+                    journey = math.ceil(gas / 10 * 2 * days * travel_distance)
+                  else: 
+                    journey = math.ceil(gas / 10 * 2 * travel_distance)
 
-                    breakfast_number = (1 * days) if travel_distance > 10 else 0
-                    meal_number = (2 * days) if travel_distance < 100 else (2 * days + 1)
-                    breakfast_value = payments[competition_type][referee_role]["COLAZIONE"]
-                    meal_value = payments[competition_type][referee_role]["PRANZO"]
-                    meals = int(breakfast_number * breakfast_value + meal_number * meal_value)
+                  breakfast_number = (1 * days) if travel_distance > 10 else 0
+                  meal_number = (2 * days) if travel_distance < 100 else (2 * days + 1)
+                  breakfast_value = payments[competition_type][referee_role]["COLAZIONE"]
+                  meal_value = payments[competition_type][referee_role]["PRANZO"]
+                  meals = float(breakfast_number * breakfast_value + meal_number * meal_value)
 
-                    nights = days if travel_distance >= 100 else (days -1) if travel_distance >= 50 else 0
-                    night_value:int = nights * payments[competition_type][referee_role]["PERNOTTO"]
-                    total_value = str(total_token_value + journey + meals + night_value)
-                    try:
-                      total_value, _ = total_value.split(".0")
-                    except ValueError:
-                      pass
+                  nights = days if travel_distance >= 100 else (days -1) if travel_distance >= 50 else 0
+                  night_value:int = nights * payments[competition_type][referee_role]["PERNOTTO"]
+                  total_value = str(total_token_value + journey + meals + night_value)
+                  try:
+                    total_value, _ = total_value.split(".0")
+                  except ValueError:
+                    pass
                     
-                    FIS_id = person["NumFIS"]
-                    datarinnovo = person["DataRinnovo"]
-                    year, month, day = datarinnovo.split("-")
-                    renewal_date = f'{day}/{month}/{year}'
-                    if values[f"-EXTRA-{person["NumFIS"]}-"] == True: days = days + 1
+                  FIS_id = person["NumFIS"]
+                  datarinnovo = person["DataRinnovo"]
+                  year, month, day = datarinnovo.split("-")
+                  renewal_date = f'{day}/{month}/{year}'
+                  if values[f"-EXTRA-{person["NumFIS"]}-"] == True: days = days + 1
 
-                    datadict = {
-                      form_fields[0]: referee_name,
-                      form_fields[1]: referee_birth_place,
-                      form_fields[2]: referee_residence_address,
-                      form_fields[3]: referee_tax_code,
-                      form_fields[4]: referee_role,
-                      form_fields[5]: competition_name,
-                      form_fields[6]: convocation,
-                      form_fields[7]: competition_place,
-                      form_fields[8]: competition_date,
-                      form_fields[9]: days,
-                      form_fields[10]: token_value,
-                      form_fields[11]: total_token_value,
-                      form_fields[12]: journey,
-                      form_fields[13]: meals,
-                      form_fields[14]: night_value,
-                      form_fields[15]: total_value,
-                      form_fields[16]: place,
-                      form_fields[17]: sign_date,
-                      form_fields[18]: FIS_id,
-                      form_fields[19]: renewal_date,
-                    }
+                  datadict = {
+                    form_fields[0]: referee_name,
+                    form_fields[1]: referee_birth_place,
+                    form_fields[2]: referee_residence_address,
+                    form_fields[3]: referee_tax_code,
+                    form_fields[4]: referee_role,
+                    form_fields[5]: competition_name,
+                    form_fields[6]: convocation,
+                    form_fields[7]: competition_place,
+                    form_fields[8]: competition_date,
+                    form_fields[9]: days,
+                    form_fields[10]: token_value,
+                    form_fields[11]: total_token_value,
+                    form_fields[12]: journey,
+                    form_fields[13]: meals,
+                    form_fields[14]: night_value,
+                    form_fields[15]: total_value,
+                    form_fields[16]: place,
+                    form_fields[17]: sign_date,
+                    form_fields[18]: FIS_id,
+                    form_fields[19]: renewal_date,
+                  }
 
-                    fillpdfs.write_fillable_pdf('data/templates/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
-                    window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
+                  fillpdfs.write_fillable_pdf('data/templates/template_rimborso.pdf',f'Export/{referee_name}.pdf', datadict)
+                  window["-OUTPUT-TERMINAL-"].update(f"Creazione di {referee_name} completata correttamente\n", text_color_for_value="green", append=True)
 
-                except Exception as e:
-                  window["-OUTPUT-TERMINAL-"].update(f"La creazione di {referee_name} ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
+              except Exception as e:
+                window["-OUTPUT-TERMINAL-"].update(f"La creazione di {referee_name} ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
 
             fill_summoning_xlsx(window, values["-CONVOCATION-DAY-"], values["-CONVOCATION-MONTH-"], values["-CONVOCATION-YEAR-"],
                                 values["-COMPETITION-NAME-"], values["-COMPETITION-DAY-"], values["-COMPETITION-MONTH-"], values["-COMPETITION-YEAR-"],
@@ -698,7 +705,6 @@ def main():
         window["-COMPETITION-TYPE-"].update(savefile["TipoGara"])
         window["-COMPETITION-PLACE-"].update(savefile["CittàGara"])
         window["-COMPETITION-ADDRESS-"].update(savefile["IndirizzoGara"])
-        window["-EXPORT-"].update(disabled=False)
         journeys = savefile["Tratte"]
         
         day,month,year = savefile["DataGara"].split("-")
@@ -723,13 +729,20 @@ def main():
           window[f"-DAYS-{numfis}-"].update(value=vals["Giorni"])
           window[f"-EXTRA-{numfis}-"].update(value=vals["Extra"])
 
+        if len(savefile["ArbitriConv"]) > 0:
+          window["-CONV-"].update(disabled=False)
+          PSG.Button.click(window["-UPDATE-"])
+
       if events == "-SUMMON-ALL-":
         for person in dit:
-          window[f"-SUMMONED-{person["NumFIS"]}-"].update(True) if person["NumFIS"] != "000000" else ""
+          window[f"-SUMMONED-{person["NumFIS"]}-"].update(True)
+        window["-CONV-"].update(disabled = False)
 
       if events == "-SUMMON-NONE-":
         for person in dit:
-          window[f"-SUMMONED-{person["NumFIS"]}-"].update(False) if person["NumFIS"] != "000000" else ""
+          window[f"-SUMMONED-{person["NumFIS"]}-"].update(False)
+        window["-CONV-"].update(disabled = True)
+        window["-EXPORT-"].update(disabled = True)
       
       if events == "-SUMMON-DAYS-ALL-":
         mass_days = PSG.popup_get_text("Inserire il numero di giorni della convocazione.\nAssicurarsi di aver selezionato tutti gli arbitri desiderati.", title="Inserimento Giorni Massivo", icon=icon(), button_color="gray", keep_on_top=True)
@@ -737,17 +750,15 @@ def main():
           if mass_days.strip() != "" and mass_days.isnumeric():
             mass_days = mass_days.strip()
             for person in dit:
-              if person["NumFIS"] != "000000":
-                if values[f"-SUMMONED-{person["NumFIS"]}-"]:
-                  window[f"-DAYS-{person["NumFIS"]}-"].update(value=mass_days)
+              if values[f"-SUMMONED-{person["NumFIS"]}-"]:
+                window[f"-DAYS-{person["NumFIS"]}-"].update(value=mass_days)
           else:
             PSG.PopupQuickMessage("Valore giorni non valido, correggere e riprovare", background_color="red")
       
       if events == "-SUMMON-DAYS-NONE-":
         for person in dit:
-          if person["NumFIS"] != "000000":
-            if values[f"-SUMMONED-{person["NumFIS"]}-"]:
-              window[f"-DAYS-{person["NumFIS"]}-"].update(value="")
+          if values[f"-SUMMONED-{person["NumFIS"]}-"]:
+            window[f"-DAYS-{person["NumFIS"]}-"].update(value="")
 
       if events in ["-EXT-ATHL-", "-EXT-SOC-", "-PATH-EXPORT-", "-PATH-XML-"]:
         disabled_check = not ((values["-EXT-ATHL-"] or values["-EXT-SOC-"]) and len(values["-PATH-EXPORT-"]) > 0 and len(values["-PATH-XML-"]) > 0)
@@ -803,6 +814,37 @@ def main():
 
       if events == "-PATH-EXPORT-":
         window["-PATH-EXPORT-"].update(values["-PATH-EXPORT-"] + "/pozzo.fis_repo")
+
+      if events == "-VIEW-EXPORT-":
+        os.startfile("Export")
+
+      if events == "-CONV-":
+        comp_techs = []
+        precomp_tech = []
+        directors = []
+        referees = []
+
+        for person in dit:
+          try:
+            if values[f"-SUMMONED-{person["NumFIS"]}-"] == True:
+              referee_name:str = person["Cognome"] + ' ' + person["Nome"]
+              referee_role:str = person["Qualifica"]
+              if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
+              if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
+              if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
+              if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
+          except:
+            window["-OUTPUT-TERMINAL-"].update(f"La creazione di convocazione ha generato il seguente errore: {e}\n", text_color_for_value="red", append=True)
+        fill_summoning_xlsx(window, values["-CONVOCATION-DAY-"], values["-CONVOCATION-MONTH-"], values["-CONVOCATION-YEAR-"],
+                            values["-COMPETITION-NAME-"], values["-COMPETITION-DAY-"], values["-COMPETITION-MONTH-"], values["-COMPETITION-YEAR-"],
+                            values["-COMPETITION-PLACE-"], precomp_tech, directors, comp_techs, referees, current_dir)
+
+      if events.startswith(("-SUMMONED-", "-NAME-")):
+        if any(values[f"-SUMMONED-{person["NumFIS"]}-"] for person in dit):
+          window["-CONV-"].update(disabled = False)
+        else:
+          window["-CONV-"].update(disabled = True)
+          window["-EXPORT-"].update(disabled = True)
 
     except Exception as e:
       window["-OUTPUT-TERMINAL-"].update(str(e) + "\n", text_color_for_value="red", append=True)
