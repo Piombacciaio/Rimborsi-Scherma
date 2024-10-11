@@ -156,7 +156,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
      PSG.Combo(["%02d" % x for x in range(1, 32)], "Giorno", key="-NEW-REFEREE-RENEWAL-DAY-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
      PSG.Combo(["%02d" % x for x in range(1, 13)], "Mese", key="-NEW-REFEREE-RENEWAL-MONTH-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0)), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-NEW-REFEREE-RENEWAL-YEAR-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
-    [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "DIRETTORE TORNEO"], "", key="-NEW-REFEREE-ROLE-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
+    [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "", key="-NEW-REFEREE-ROLE-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
     [PSG.VPush()],
     [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray", disabled=True)]
     ]
@@ -184,7 +184,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
      PSG.Combo(["%02d" % x for x in range(1, 32)], "Giorno", key="-EDIT-REFEREE-RENEWAL-DAY-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
      PSG.Combo(["%02d" % x for x in range(1, 13)], "Mese", key="-EDIT-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-EDIT-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True)],
-    [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "DIRETTORE TORNEO"], "", key="-EDIT-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0), disabled=True),
+    [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "", key="-EDIT-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0), disabled=True),
      PSG.Push(), PSG.Button("Salva Modifiche", key="-EDIT-REFEREE-SAVE-", button_color="gray", disabled=True)]
   ]
   
@@ -618,7 +618,7 @@ def main():
                   referee_role:str = person["Qualifica"]
                   if referee_role in ["ARBITRO ASP.", "ARBITRO NAZ.",  "ARBITRO INT."]: referees.append(referee_name)
                   if referee_role == "DIRETTORE TORNEO": directors.append(referee_name)
-                  if referee_role == "COMPUTERISTA": comp_techs.append(referee_name)
+                  if referee_role in ["COMPUTERISTA", "4FENCE"]: comp_techs.append(referee_name)
                   if values[f"-EXTRA-{person["NumFIS"]}-"] == True and referee_role in ["COMPUTERISTA", "DIRETTORE TORNEO"]: precomp_tech.append(referee_name)
                   days = int(values[f"-DAYS-{person["NumFIS"]}-"])
                   token_value:int = payments[competition_type][referee_role]["GETTONE"]
@@ -640,12 +640,17 @@ def main():
 
                   nights = days if travel_distance >= 100 else (days -1) if travel_distance >= 50 else 0
                   night_value:int = nights * payments[competition_type][referee_role]["PERNOTTO"]
-                  total_value = str(total_token_value + journey + meals + night_value)
+                  if not referee_role == "4FENCE":
+                    total_value = str(total_token_value + journey + meals + night_value)
+                  else:
+                    referee_role = "COMPUTERISTA"
+                    journey = 0
+                    total_value = str(total_token_value + meals + night_value)
                   try:
                     total_value, _ = total_value.split(".0")
                   except ValueError:
                     pass
-                    
+
                   FIS_id = person["NumFIS"]
                   datarinnovo = person["DataRinnovo"]
                   year, month, day = datarinnovo.split("-")
