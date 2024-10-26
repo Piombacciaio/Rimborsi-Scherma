@@ -1,4 +1,4 @@
-import calendar, datetime as dt, json, math, os, platform, PySimpleGUI as PSG, subprocess, xmltodict
+import calendar, datetime as dt, json, math, os, PySimpleGUI as PSG, xmltodict
 import data.cf as cf
 import urllib.parse
 if os.name == "nt": import win32com.client as win32
@@ -407,6 +407,9 @@ def main():
   current_day = today.day
   current_dir, _ = str(os.path.realpath(__file__)).replace("\\", "/").rsplit("/", 1)
   
+  if not os.path.exists("Export/"):
+    os.mkdir("Export/")
+
   dit:list[dict]
   origins:list[str]
   payments:dict[dict]
