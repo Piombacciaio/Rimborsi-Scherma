@@ -11,6 +11,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from threading import Thread
 
+BTN_RED = "#f03426"
+
+
 def icon():
   "Byte data of the GUI icon"
   return b'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'
@@ -112,7 +115,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     PSG.Text("/"),
     PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, enable_events=True, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", enable_events=True, key="-GAS-PRICE-", s=(5,1)), PSG.Text("€/L")],
-    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Convocazione", key="-CONV-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Vedi Export", key="-VIEW-EXPORT-", button_color="gray"), PSG.Push(), PSG.Button("Aggiorna Arbitri", key="-RLD-GSA-", button_color="gray")],
+    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Convocazione", key="-CONV-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Vedi Export", key="-VIEW-EXPORT-", button_color="gray"), PSG.Button("Reset", key="-COMPETITION-RESET-", button_color=BTN_RED), PSG.Push(), PSG.Button("Aggiorna Arbitri", key="-RLD-GSA-", button_color="gray")],
     [PSG.VPush()],
     [PSG.Text("Output"), PSG.Line()],
     [PSG.Multiline(disabled=True, autoscroll=True, expand_x=True, auto_refresh=True, s=(1, 6), key="-OUTPUT-TERMINAL-", sbar_arrow_color="white", sbar_background_color="grey")],
@@ -159,7 +162,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
      PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-NEW-REFEREE-RENEWAL-YEAR-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0))],
     [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "", key="-NEW-REFEREE-ROLE-", enable_events=True, button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0))],
     [PSG.VPush()],
-    [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray", disabled=True)]
+    [PSG.Button("Nuovo Arbitro", key="-ADD-NEW-REFEREE-", button_color="gray", disabled=True), PSG.Button("Reset", key="-NEW-REFEREE-RESET-", button_color=BTN_RED)]
     ]
   
   combo_edit_text = list(f"{person["NumFIS"]} - {person["Cognome"].upper()} {person["Nome"].upper()}" for person in dit)
@@ -186,7 +189,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
      PSG.Combo(["%02d" % x for x in range(1, 13)], "Mese", key="-EDIT-REFEREE-RENEWAL-MONTH-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True), PSG.Text("/"),
      PSG.Combo([x for x in range(year - 1, year + 2)][::-1], "Anno", key="-EDIT-REFEREE-RENEWAL-YEAR-", button_background_color="gray", button_arrow_color="white", s=(6,1), p=(10,0), disabled=True)],
     [PSG.Text("Qualifica", s=(15,1)), PSG.Combo(["ARBITRO ASP.", "ARBITRO NAZ.", "ARBITRO INT.", "TECNICO ARMI", "COMPUTERISTA", "4FENCE", "DIRETTORE TORNEO"], "", key="-EDIT-REFEREE-ROLE-", button_background_color="gray", button_arrow_color="white", s=(20,1), p=(10,0), disabled=True),
-     PSG.Push(), PSG.Button("Salva Modifiche", key="-EDIT-REFEREE-SAVE-", button_color="gray", disabled=True)]
+     PSG.Push(), PSG.Button("Salva Modifiche", key="-EDIT-REFEREE-SAVE-", button_color="gray", disabled=True), PSG.Button("Reset", key="-EDIT-REFEREE-RESET-", button_color=BTN_RED, disabled=True)]
   ]
   
   fis_repo_tab = [
@@ -575,6 +578,7 @@ def main():
         window["-EDIT-REFEREE-RENEWAL-YEAR-"].update(year, disabled=False)
         window["-EDIT-REFEREE-ROLE-"].update(edit_ref_chosen["Qualifica"], disabled=False)
         window["-EDIT-REFEREE-SAVE-"].update(disabled=False)
+        window["-EDIT-REFEREE-RESET-"].update(disabled=False)
 
       if events.startswith("-NAME-"):
         summon = events.replace("-NAME-", "-SUMMONED-")
@@ -854,6 +858,63 @@ def main():
         else:
           window["-CONV-"].update(disabled = True)
           window["-EXPORT-"].update(disabled = True)
+
+      if events == "-COMPETITION-RESET-":
+        window["-COMPETITION-NAME-"].update("Nome in locandina")
+        window["-COMPETITION-TYPE-"].update("Tipo")
+        window["-COMPETITION-PLACE-"].update("Città")
+        window["-COMPETITION-ADDRESS-"].update("Via")
+        window["-COMPETITION-DAY-"].update("%02d.%02d"  % (current_day, current_day + 1))
+        window["-COMPETITION-MONTH-"].update("%02d" % current_month)
+        window["-COMPETITION-YEAR-"].update(current_year)
+        window["-CONVOCATION-DAY-"].update("%02d" % (current_day - 8 if current_day - 8 > 0 else (calendar.monthrange(current_year, (current_month - 1 if current_month - 1 > 0 else 12))[1] + current_day - 8)))
+        window["-CONVOCATION-MONTH-"].update("%02d" % (current_month if current_day - 8 > 0 else (current_month - 1 if current_month - 1 > 0 else 12)))
+        window["-CONVOCATION-YEAR-"].update(current_year if current_day - 8 > 0 or current_month - 1 > 0 else current_year - 1)
+        window["-SIGN-DAY-"].update("%02d" % current_day)
+        window["-SIGN-MONTH-"].update("%02d" % current_month)
+        window["-SIGN-YEAR-"].update("%02d" % current_year)
+        window["-GAS-PRICE-"].update("1.95")
+        confirm = PSG.popup_ok_cancel("Cancellare anche i dati delle tratte?", title="Conferma", icon=icon(), keep_on_top=True)
+        if confirm == "OK":
+          journeys = {}
+        window["-EXPORT-"].update(disabled=True)
+        window["-CONV-"].update(disabled=True)
+
+      if events == "-NEW-REFEREE-RESET-":
+        window["-NEW-REFEREE-NAME-"].update("")
+        window["-NEW-REFEREE-SURNAME-"].update("")
+        window["-NEW-REFEREE-SEX-"].update(False)
+        window["-NEW-REFEREE-RESIDENCE-"].update("")
+        window["-NEW-REFEREE-ADDRESS-"].update("")
+        window["-NEW-REFEREE-BIRTH-PLACE-"].update("")
+        window["-NEW-REFEREE-BIRTH-DAY-"].update("Giorno")
+        window["-NEW-REFEREE-BIRTH-MONTH-"].update("Mese")
+        window["-NEW-REFEREE-BIRTH-YEAR-"].update("Anno")
+        window["-NEW-REFEREE-FIS-ID-"].update("")
+        window["-NEW-REFEREE-RENEWAL-DAY-"].update("Giorno")
+        window["-NEW-REFEREE-RENEWAL-MONTH-"].update("Mese")
+        window["-NEW-REFEREE-RENEWAL-YEAR-"].update("Anno")
+        window["-NEW-REFEREE-ROLE-"].update("")
+
+      if events == "-EDIT-REFEREE-RESET-":
+        window["-EDIT-REFEREE-CHOICE-"].update("Seleziona")
+        window["-EDIT-REFEREE-DEL-"].update(disabled=True)
+        window["-EDIT-REFEREE-NAME-"].update("", disabled=True)
+        window["-EDIT-REFEREE-SURNAME-"].update("", disabled=True)
+        window["-EDIT-REFEREE-SEX-"].update(False, disabled=True)
+        window["-EDIT-REFEREE-RESIDENCE-"].update("", disabled=True)
+        window["-EDIT-REFEREE-ADDRESS-"].update("", disabled=True)
+        window["-EDIT-REFEREE-BIRTH-PLACE-"].update("", disabled=True)
+        window["-EDIT-REFEREE-BIRTH-DAY-"].update("Giorno", disabled=True)
+        window["-EDIT-REFEREE-BIRTH-MONTH-"].update("Mese", disabled=True)
+        window["-EDIT-REFEREE-BIRTH-YEAR-"].update("Anno", disabled=True)
+        window["-EDIT-REFEREE-FIS-ID-"].update("")
+        window["-EDIT-REFEREE-RENEWAL-DAY-"].update("Giorno", disabled=True)
+        window["-EDIT-REFEREE-RENEWAL-MONTH-"].update("Mese", disabled=True)
+        window["-EDIT-REFEREE-RENEWAL-YEAR-"].update("Anno", disabled=True)
+        window["-EDIT-REFEREE-ROLE-"].update("", disabled=True)
+        window["-EDIT-REFEREE-SAVE-"].update(disabled=True)
+        window["-EDIT-REFEREE-RESET-"].update(disabled=True)
 
     except Exception as e:
       window["-OUTPUT-TERMINAL-"].update(str(e) + "\n", text_color_for_value="red", append=True)
