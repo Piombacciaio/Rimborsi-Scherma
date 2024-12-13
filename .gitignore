@@ -1,6 +1,7 @@
 data/consensi
 data/__pycache__
 data/Templates*
+build/*
 env
 Export
 TODO*
@@ -10,4 +11,5 @@ TODO*
 *.dt
 *.zip
 *save_conf
+*.spec
 Installer

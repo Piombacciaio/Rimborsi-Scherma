@@ -18,6 +18,7 @@ def icon():
 def get_distance(origins: list[str]|str, destination:str, window:PSG.Window, journeys:dict[str,float]) -> None:
   """Webscraper to get fastest route on google maps"""
   try:
+    window["-OUTPUT-TERMINAL-"].update(f"Calcolo tratte in corso\n", text_color_for_value="green", append=True)
     #URL Encode
     url_origins:list[str] = []
     if type(origins) == str:
@@ -103,7 +104,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     PSG.Text("/"),
     PSG.Combo(["%02d" % x for x in range(1, 13)], default_value="%02d" % (month if day - 8 > 0 else (month - 1 if month - 1 > 0 else 12)), enable_events=True, key="-CONVOCATION-MONTH-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
-    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value= (year if day - 8 > 0 and month - 1 > 0 else year - 1), enable_events=True, key="-CONVOCATION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
+    PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value= (year if day - 8 > 0 or month - 1 > 0 else year - 1), enable_events=True, key="-CONVOCATION-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Data Firma", s=(11,1)), 
     PSG.Combo(["%02d" % x for x in range(1, 32)], default_value="%02d" % day, enable_events=True, key="-SIGN-DAY-", s=(8,1), button_background_color="gray", button_arrow_color="white"),
     PSG.Text("/"),
@@ -111,7 +112,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     PSG.Text("/"),
     PSG.Combo([x for x in range(year - 1, year + 2)][::-1], default_value=year, enable_events=True, key="-SIGN-YEAR-", s=(8,1), button_background_color="gray", button_arrow_color="white")],
     [PSG.Text("Costo Benzina", s=(11,1)), PSG.Input("1.95", enable_events=True, key="-GAS-PRICE-", s=(5,1)), PSG.Text("€/L")],
-    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Convocazione", key="-CONV-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Vedi Export", key="-VIEW-EXPORT-", button_color="gray"), PSG.Push(), PSG.Button("Ricarica Config", key="-RLD-CFG-", button_color="gray")],
+    [PSG.Button("Genera", key="-EXPORT-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Convocazione", key="-CONV-", disabled=True, bind_return_key=True, button_color="gray"), PSG.Button("Vedi Export", key="-VIEW-EXPORT-", button_color="gray"), PSG.Push(), PSG.Button("Aggiorna Arbitri", key="-RLD-GSA-", button_color="gray")],
     [PSG.VPush()],
     [PSG.Text("Output"), PSG.Line()],
     [PSG.Multiline(disabled=True, autoscroll=True, expand_x=True, auto_refresh=True, s=(1, 6), key="-OUTPUT-TERMINAL-", sbar_arrow_color="white", sbar_background_color="grey")],
@@ -189,7 +190,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
   ]
   
   fis_repo_tab = [
-    [PSG.Text("XML Pozzo", s=(11,1)), PSG.Input("", disabled=True, key="-PATH-XML-", tooltip=tooltip_dit, enable_events=True, s=(47,1), disabled_readonly_background_color="black", disabled_readonly_text_color="white"), 
+    [PSG.Text("XML Pozzo", s=(11,1)), PSG.Input("", disabled=True, key="-PATH-XML-", enable_events=True, s=(47,1), disabled_readonly_background_color="black", disabled_readonly_text_color="white"), 
      PSG.FileBrowse("Apri", file_types=(("XML files", "*.xml"),), button_color="gray", s=(5,1))],
     [PSG.Text("Estrazione Dati Tesserati"), PSG.Checkbox(text="", key="-EXT-ATHL-", enable_events=True) , PSG.Line()],
     [PSG.Text("Cognome", s=(12,1)), PSG.Checkbox(text="", key="-EXT-SURNAME-", s=(1,1), disabled=True), PSG.VerticalSeparator(),
@@ -207,7 +208,7 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
     [PSG.Button("Sel. Tutti", key="-EXT-ALL-SOC-", button_color="gray", disabled=True), PSG.Button("Sel. Nessuno", key="-EXT-NONE-SOC-", button_color="gray", disabled=True)],
     [PSG.VPush()],
     [PSG.Text("Stato Export", s=(11,1)), PSG.Text("In Attesa", key="-EXT-STATUS-")],
-    [PSG.Text("Cartella Export", s=(11,1)), PSG.Input("", disabled=True, key="-PATH-EXPORT-", tooltip=tooltip_dit, enable_events=True, s=(47,1), disabled_readonly_background_color="black", disabled_readonly_text_color="white"),
+    [PSG.Text("Cartella Export", s=(11,1)), PSG.Input("", disabled=True, key="-PATH-EXPORT-", enable_events=True, s=(47,1), disabled_readonly_background_color="black", disabled_readonly_text_color="white"),
      PSG.FolderBrowse("Apri", button_color="gray", s=(5,1))],
     [PSG.Button("Crea fis_repo", button_color="gray", key="-EXT-CREATE-", disabled=True, tooltip=".fis_repo è un normale file .json con estensione personalizzata")]
   ]
@@ -343,12 +344,11 @@ def XML_to_fis_repo(window:PSG.Window, values:dict[str]):
       temp_dict = xmltodict.parse(xml_file.read())
 
     data_dict = {}
-    data_dict["Tesserati"] = []
-    data_dict["Societa"] = []
 
     export_path = values["-PATH-EXPORT-"]
 
     if values["-EXT-ATHL-"] and any([values["-EXT-SURNAME-"], values["-EXT-NAME-"], values["-EXT-SEX-"], values["-EXT-BIRTH-"], values["-EXT-LOCATION-"], values["-EXT-MEMBERSHIP-"]]):
+      data_dict["Tesserati"] = []
       for person in temp_dict["dsSocAtlXML"]["Tesserati"]:
         if values["-EXT-MEMBERSHIP-"]:
           person["DataRinnovo"], _ = person["DataRinnovo"].split("T")
@@ -375,6 +375,7 @@ def XML_to_fis_repo(window:PSG.Window, values:dict[str]):
         data_dict["Tesserati"].append(person)
 
     if values["-EXT-SOC-"] and any([values["-EXT-CODES-"], values["-EXT-SOC-NAME-"], values["-EXT-SOC-LOC-"]]):
+      data_dict["Societa"] = []
       for soc in temp_dict["dsSocAtlXML"]["Societa"]:
         if values["-EXT-CODES-"]:
           soc["DataScadenza"], _ = soc["DataScadenza"].split("T")
@@ -433,7 +434,7 @@ def main():
       
       if events == "-CLR-OUT-": window["-OUTPUT-TERMINAL-"].update("")
       #if events == "-DEBUG-": print("Hi!") #Left this here even if not needed 'cause my best friend (she made this) was extremely proud of her work
-      if events == "-RLD-CFG-": 
+      if events == "-RLD-GSA-": 
         dit, origins, payments, form_fields = load_data(current_dir)
         window.close()
         window = PSG.Window(f"Rimborsi Arbitri | by Piombo Andrea", create_view(current_year, current_month, current_day, dit), icon=icon(), finalize=True, keep_on_top=True)
