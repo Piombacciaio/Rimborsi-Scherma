@@ -49,8 +49,8 @@ def get_distance(origins: list[str]|str, destination:str, window:PSG.Window, jou
     for place in url_origins:
       try:
         driver.get(f"https://www.google.com/maps/dir/{place}/{url_destinazion}")
-        wait.until(EC.element_to_be_clickable((By.XPATH, "//img[@aria-label='Auto']"))) #Wait for page to finish loading
-        driver.find_element(By.XPATH, "//img[@aria-label='Auto']").click()
+        wait.until(EC.element_to_be_clickable((By.XPATH, "//div[@aria-label='Auto']"))) #Wait for page to finish loading
+        driver.find_element(By.XPATH, "//div[@aria-label='Auto']").click()
         wait.until(EC.text_to_be_present_in_element((By.CLASS_NAME, "XdKEzd"), "")) #Wait for page to finish loading
         time, route = driver.find_element(By.CLASS_NAME, "XdKEzd").text.split("\n") #Get best routes
         distance, unit = route.split(" ") #time and unit variables are not used in this project
@@ -228,7 +228,8 @@ def create_view(year:int, month:int, day:int, dit:list[dict]) -> list[list[PSG.T
       )
     ],
     [PSG.Button("Salva Configurazione", key="-SAVE-CONFIG-", button_color="gray"), PSG.Button("Carica Configurazione", key="-LOAD-CONFIG-", button_color="gray"),
-     PSG.Checkbox("KeepOnTop", default=True, key="-CHANGE-VISIBILITY-", enable_events=True), PSG.Button("", k="-UPDATE-", visible=False)]
+     PSG.Push(), PSG.Checkbox("KeepOnTop", default=True, key="-CHANGE-VISIBILITY-", enable_events=True), PSG.Button("", k="-UPDATE-", visible=False)],
+    [PSG.Input(key="-LOAD-CONV-PATH-", disabled=True, visible=False, enable_events=True), PSG.FileBrowse("Carica Export Convocazioni", file_types=(("SAVE_CONF files", "*.save_conf"),), key="-LOAD-CONV-", button_color="gray")]
   ]
 
   return default_view
@@ -745,7 +746,42 @@ def main():
         if len(savefile["ArbitriConv"]) > 0:
           window["-CONV-"].update(disabled=False)
           PSG.Button.click(window["-UPDATE-"])
+      
+      if events == "-LOAD-CONV-PATH-":
+        path = values["-LOAD-CONV-PATH-"]
+        with open(path, "r", encoding="utf-8") as f:
+            savefile = json.load(f)
+        
+        window["-COMPETITION-NAME-"].update(savefile["NomeGara"])
+        window["-COMPETITION-TYPE-"].update("")
+        window["-COMPETITION-PLACE-"].update(savefile["CittàGara"])
+        window["-COMPETITION-ADDRESS-"].update(savefile["IndirizzoGara"])
+        
+        day,month,year = savefile["DataGara"].split("-")
+        window["-COMPETITION-DAY-"].update(day)
+        window["-COMPETITION-MONTH-"].update(month)
+        window["-COMPETITION-YEAR-"].update(year)
+        
+        day,month,year = savefile["DataConv"].split("-")
+        window["-CONVOCATION-DAY-"].update(day)
+        window["-CONVOCATION-MONTH-"].update(month)
+        window["-CONVOCATION-YEAR-"].update(year)
+        
+        day,month,year = savefile["DataFirma"].split("-")
+        window["-SIGN-DAY-"].update(day)
+        window["-SIGN-MONTH-"].update(month)
+        window["-SIGN-YEAR-"].update(year)
 
+        for numfis, vals in savefile["ArbitriConv"].items():
+          window[f"-SUMMONED-{numfis}-"].update(value=True)
+          window[f"-DAYS-{numfis}-"].update(value=vals["Giorni"])
+          window[f"-EXTRA-{numfis}-"].update(value=vals["Extra"])
+        
+        journeys = {}
+        save_config(window, current_dir, dit, values, journeys)
+        Thread(target=get_distance, args=[origins, values["-COMPETITION-ADDRESS-"], window, journeys]).start() #Moved get_distance to a separate Thread to avoid freezing the window
+        window["-OUTPUT-TERMINAL-"].update(f"Caricamento dati della convocazione completato.\nImpostare il tipo di gara e attendere la fine del calcolo delle tratte.\n", text_color_for_value="green", append=True)
+        
       if events == "-SUMMON-ALL-":
         for person in dit:
           window[f"-SUMMONED-{person["NumFIS"]}-"].update(True)
